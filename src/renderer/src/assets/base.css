@@ -1,0 +1,127 @@
+:root{
+  --color-fundo: #edf6fd;
+  --color-box: #ffffff;
+
+  --color-base : #8129fb;
+  --color-base-translucid: rgba(113, 4, 143, 0.508);
+  --color-hover : #9549ff;
+  --color-contrast : #02906a;
+  --color-contrast-hover : #F5F9FC;
+  
+  --color-text: #2e2e2e;
+  --color-text-secondary: #7c7a7a;
+
+  --color-code : rgb(223, 238, 255);
+  --color-imput: #ffffff;
+  --color-input-label: #19c5ec;
+  --color-input-focus: #EBEDF3;
+  --color-input-border:#e2e2e3;
+  --color-input-placeholder:#c0c0c0;
+
+  --color-nav:rgba(0, 0, 0, 0.984);
+  --color-nav-itens:rgba(224, 224, 224, 0.984);
+  --color-wall-load:rgba(255, 255, 255, 0.661);
+
+  --color-shadow: #cac9c9;
+  --color-shadow-2: #f1f1f1;
+  --color-gray: #939191;
+  --color-ligthgray: #E7EAF0;
+  --color-darkgray: #5d5d5d;
+  --color-success: #86ebba;
+  --color-primary: #6fbcf2;
+  --color-warning: #f5c674;
+  --color-danger: #ff586e;
+  --color-success-dark: #1d7254;
+  --color-primary-dark: #024f92;
+  --color-warning-dark: #a16704;
+  --color-danger-dark: #7e1c29;
+
+  --border-box: 1px solid #E1EDF6;
+}
+
+.dark:root{
+  --color-fundo: #000000;
+  --color-box: #1E293B;
+
+  --color-base : #0da5f0;
+  --color-hover : #058ed3;
+  --color-contrast : #acd1ff;
+  --color-contrast-hover : #0091ff29;
+  
+  --color-text: #f0f0f0;
+  --color-text-secondary: #cfcfcf;
+  --color-wall-load:rgba(35, 35, 35, 0.458);
+  --color-code : rgba(38, 74, 116, 0.795);
+
+  --color-shadow: rgba(149, 220, 255, 0.35);
+  --color-shadow-2: rgba(149, 220, 255, 0.15);
+  --color-imput: #000000;
+  --color-input-label: #64d4ec;
+  --color-input-focus: #2f2f2f;
+  --color-input-border:#e2e2e3;
+  --color-input-placeholder:#787878;
+  
+  --color-nav: #1e293be9;
+  --color-nav-itens:#cfcfcf;
+  --color-wall-load:rgba(39, 39, 39, 0.661);
+
+  --border-box: 1px solid #334155;
+}
+
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+*, h1, h2, h3, h4, h5{
+  font-size: 1rem;
+}
+
+*:focus {
+  outline: none;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-fundo);
+  background-repeat:no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  transition:color 0.5s, background-color 0.5s;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+}
+
+button, input[type="submit"], input[type="reset"] {
+	background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}

@@ -1,0 +1,111 @@
+<script setup>
+import { onMounted, ref } from 'vue'
+import dates from '../utils/dates';
+
+const props   = defineProps({ header:Object })
+const admpass = ref('')
+const isadmin = ref(false)
+const infos   = ref({
+    datenow: dates.dateNow(),
+    hournow: dates.hourNow()
+})
+
+function elevateAccess(){
+    console.log('sudo su')
+}
+
+onMounted(() => {
+    setInterval(() => {
+        infos.value.hournow = dates.hourNow()
+    }, 1000);
+})
+
+</script>
+
+<template>
+    
+    <div class="modal fade" id="passModal" tabindex="-1" aria-labelledby="passModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header px-4 border-0">
+                    <h1 class="modal-title fs-6" id="passModalLabel"><i class="bi bi-lock"></i> Acesso Administrativo</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form @submit.prevent="elevateAdmin">
+                    <div class="modal-body px-4">
+                        <div class="text-center mb-2">
+                            <i class="bi bi-lock fs-1"></i>
+                            <p>Desbloquear funcionalidades administrativas do Sistema. Registro e Gestão de Taras, Produtos e Emissão de Relatórios</p>
+                        </div>
+                        <form class="mb-3 text-center" @submit.prevent="elevateAccess">
+                            <label for="admpass" class="form-label">Senha do Administrador</label>
+                            <input type="password" class="form-control" id="admpass" v-model="admpass">
+                        </form>
+                    </div>
+                    <div class="modal-footer border-0 px-4 mb-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
+                        <button type="button" class="btn btn-success"><i class="bi bi-check-circle"></i> Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <header class="header-main d-flex justify-content-between align-items-center p-4">
+        <h1><i class="bi" :class="props.header.icon"></i> {{ props.header.title }}</h1>
+        <div class="header-main-info d-flex align-items-center">
+            <div class="ms-4">
+                <h2>{{ infos.hournow }}</h2>
+                <p>{{ infos.datenow }}</p>
+            </div>
+            <div class="ms-4 d-flex align-items-center">
+                <i class="bi bi-person me-2 fs-4"></i>
+                <div>
+                    <h2>{{ isadmin ? 'Administrador' : 'Vendedor' }}</h2>
+                    <p>Perfil de Acesso</p>
+                </div>
+            </div>
+            <div v-if="!isadmin" class="ms-4 d-flex align-items-center toggleadmin" data-bs-toggle="modal" data-bs-target="#passModal">
+                <i class="bi bi-lock me-2 fs-4"></i>
+                <div>
+                    <h2>Admin</h2>
+                    <p>Acesso administrador</p>
+                </div>
+            </div>
+            <button v-else type="button" class="btn btn-lg btn-outline-light ms-4"><i class="bi bi-door-open me-1"></i>Sair</button>
+        </div>
+    </header>
+</template>
+
+<style scoped>
+    .header-main{
+        width: 100%;
+        background-color: var(--color-base);
+        color: white;
+    }
+
+    .header-main h1{
+        font-size: 2rem;
+        margin: 0;
+        padding: 0;
+    }
+
+    .header-main h1 i{
+        font-size: 2rem;
+    }
+
+    .header-main-info h2{
+        margin: 0;
+        padding: 0;
+    }
+
+    .header-main-info p{
+        margin: 0;
+        padding: 0;
+        font-size: small;
+    }
+
+    .toggleadmin{
+        cursor: pointer;
+    }
+</style>
