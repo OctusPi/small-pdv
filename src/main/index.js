@@ -2,8 +2,8 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import conn from './conn'
-import { Model } from 'sequelize'
+import Controller from './controller'
+
 
 function createWindow() {
   // Create the browser window.
@@ -19,6 +19,11 @@ function createWindow() {
     }
   })
 
+  const controller = new Controller(mainWindow.webContents)
+
+  controller.listen()
+  
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.maximize()
     mainWindow.show()
@@ -29,8 +34,8 @@ function createWindow() {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -51,17 +56,7 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
-  // IPC test
-  ipcMain.on('ping', (data) => {
-    try {
-      conn.authenticate()
-      console.log(data)
-    } catch (error) {
-      console.error('Unable to connect to the database:', error);
-    }
-  })
-
+  
   createWindow()
 
   app.on('activate', function () {

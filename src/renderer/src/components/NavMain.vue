@@ -13,7 +13,7 @@ const menu = ref([
 <template>
   <nav class="main-nav">
     <div class="icon-system py-4">
-      <img src="/src/assets/imgs/icon.png" />
+      <img src="./../assets/icon.png" />
       <h1>SmallPDV</h1>
       <p>Gestor de Vendas</p>
     </div>

@@ -1,10 +1,13 @@
 <script setup>
 import { ref } from 'vue'
+import ctrl from '../services/controller'
 import masks from "@renderer/utils/masks.js"
 
 const page = ref({})
 
-const ipcHandle = () => window.electron.ipcRenderer.send('ping', ['aaaa'])
+const ipcHandle = () => {
+  
+}
 </script>
 
 <template>
