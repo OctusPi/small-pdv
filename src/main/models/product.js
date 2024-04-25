@@ -1,27 +1,18 @@
-import { Model} from 'sequelize';
+import { DataTypes} from 'sequelize';
+import conn from '../conn';
 
-export default (sequelize, DataTypes) => {
-  class Product extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+const Product = conn.define(
+  'Product',
+  {
+    id:{ type: DataTypes.BIGINT, primaryKey:true, autoIncrement:true },
+    cod: {type: DataTypes.STRING, allowNull: false},
+    name: {type: DataTypes.STRING, allowNull: false},
+    sale: {type: DataTypes.INTEGER, allowNull: false},
+    unitpeso: {type: DataTypes.DOUBLE, allowNull: true},
+    unitval: {type: DataTypes.DOUBLE, allowNull: false},
+    pic: {type: DataTypes.STRING},
+    description: {type: DataTypes.STRING},
   }
-  Product.init({
-    cod: DataTypes.STRING,
-    name: DataTypes.STRING,
-    sale: DataTypes.INTEGER,
-    unitpeso: DataTypes.DOUBLE,
-    unitval: DataTypes.DOUBLE,
-    pic: DataTypes.STRING,
-    description: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Product',
-  });
-  return Product;
-};
+);
+
+export default Product

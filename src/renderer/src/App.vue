@@ -8,7 +8,7 @@ import SetupView from './views/SetupView.vue'
 
 const controller = new Controller()
 
-const setupView = ref(false)
+const setupView = ref(true)
 
 function callSetup(){
   controller.send('setting.list', {})
@@ -16,14 +16,15 @@ function callSetup(){
 
 onMounted(() => {
   callSetup()
-  controller.listen((data) => console.log(data))
+  controller.listen((data) => setupView.value = data)
+  console.log(data)
 })
 
 </script>
 
 <template>
   <div class="container-app">
-    <template v-if="setupView">
+    <template v-if="!setupView">
       <SetupView />
     </template>
     <template v-else>

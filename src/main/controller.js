@@ -1,4 +1,5 @@
 import { ipcMain, MessageChannelMain } from 'electron'
+import exec from 'child_process'
 import conn from './conn'
 import models from './models'
 
@@ -9,8 +10,7 @@ class Controller{
 
     listen(){
         ipcMain.on('ping', (event, data) => {
-            const action = this.define_action(data)
-            this.exec_action(action, data.data)
+            this.exec_action()
         })
     }
 
@@ -27,29 +27,40 @@ class Controller{
         }
     }
 
-    exec_action(action, data){
-        const model = models[action.model]
+    async exec_action(){
+        const users = await models['setting'].findAll().then((result) => {
+            console.log(users.every(result => result instanceof User)); // true
+            console.log('All users:', JSON.stringify(result, null, 2));
+            console.log(JSON.stringify(result, null, 2))
+            this.send(result)
+        })
+        
+    }
 
-        switch(action.method){
-            case 'list':
-                this.send(model.findAll())
-                break
-            case 'search':
-                this.send(model.findAndCountAll({where:data}))
-                break
-            case 'details':
-                this.send(model.findOne({where:data}))
-                break
-            case 'save':
-                console.log('save: '+data)
-                break
-            case 'update':
-                console.log('update: '+data)
-                break
-            case 'remove':
-                console.log('remove: '+data)
-                break
-        }
+    async execute_query(model, action, data){
+       conn.authenticate().then(async () => {
+            switch(action){
+                case 'list':
+                    const k = await model.findAll().then(m => m)
+                    return k
+                case 'details':
+                    return model.findOne({where:data}).then(m => m)
+
+                default:
+                    return null
+                // case 'save':
+                //     console.log('save: '+data)
+                //     break
+                // case 'update':
+                //     console.log('update: '+data)
+                //     break
+                // case 'remove':
+                //     console.log('remove: '+data)
+                //     break
+            }
+        }).catch(err => {
+            return 'Falha ao Conectar'
+        })
     }
 
 }

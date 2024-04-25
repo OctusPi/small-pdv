@@ -3,7 +3,7 @@ import { Sequelize } from 'sequelize'
 
 const conn = new Sequelize({
     dialect: 'sqlite',
-    storage: path.join(__dirname, 'storage', 'database.sqlite')
+    storage: path.join(__dirname, 'database.sqlite')
 });
 
 

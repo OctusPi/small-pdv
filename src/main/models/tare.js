@@ -1,24 +1,15 @@
-import { Model} from 'sequelize';
+import { DataTypes} from 'sequelize';
+import conn from '../conn';
 
-export default (sequelize, DataTypes) => {
-  class Tare extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+const Tare = conn.define(
+  'Tare',
+  {
+    id:{ type: DataTypes.BIGINT, primaryKey:true, autoIncrement:true },
+    weight: {type: DataTypes.DOUBLE, allowNull:false},
+    type: {type: DataTypes.INTEGER, allowNull:false},
+    pic: {type: DataTypes.STRING},
+    description: {type: DataTypes.STRING},
   }
-  Tare.init({
-    weight: DataTypes.DOUBLE,
-    type: DataTypes.INTEGER,
-    pic: DataTypes.STRING,
-    description: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Tare',
-  });
-  return Tare;
-};
+);
+
+export default Tare

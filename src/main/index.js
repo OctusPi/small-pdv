@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import Controller from './controller'
+import migrations from './migrations'
 
 
 function createWindow() {
@@ -21,11 +22,11 @@ function createWindow() {
 
   const controller = new Controller(mainWindow.webContents)
 
+  migrations.createTables()
   controller.listen()
-  
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.maximize()
+    // mainWindow.maximize()
     mainWindow.show()
   })
 
@@ -33,7 +34,6 @@ function createWindow() {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
-
   
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
