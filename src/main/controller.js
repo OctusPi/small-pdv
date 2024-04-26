@@ -1,5 +1,6 @@
 import { ipcMain, MessageChannelMain } from 'electron'
 import models from './models'
+import notifys from './utils/notifys'
 
 class Controller{
     constructor(webcontent){
@@ -40,6 +41,8 @@ class Controller{
                 return await model.findAll()
             case 'one':
                 return await model.findOne(data ?? {})
+            case 'save':
+                return notifys.info('Dados Recebidos para salvar')
             default:
                 return null
         }

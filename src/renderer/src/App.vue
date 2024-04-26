@@ -5,10 +5,13 @@ import Controller from './services/controller'
 import NavMain from './components/NavMain.vue';
 import ModalDelete from './components/ModalDelete.vue';
 import SetupView from './views/SetupView.vue'
+import NotificationUI from './components/NotificationUI.vue';
 
-const controller = new Controller()
-
-const setupView = ref(false)
+const controller   = new Controller()
+const setupView    = ref(false)
+const datalist     = ref([])
+const notification = ref({show: false, data:{type:'success', msg: ''}})
+const remove       = ref({})
 
 function callSetup(){
   controller.send('Setting.one', {})
@@ -18,23 +21,23 @@ onBeforeMount(() => {
   callSetup()
   controller.listen((data) => {
     setupView.value = data
-    console.log(typeof data)
-    console.log(setupView.value)
   })
-
 })
 
 </script>
 
 <template>
+
+  <NotificationUI :alert="notification" />
+
   <div class="container-app">
     <template v-if="!setupView">
-      <SetupView />
+      <SetupView @callAlert="(data) => {notification = data}" />
     </template>
     <template v-else>
-      <ModalDelete />
+      <ModalDelete :params="remove" />
       <NavMain />
-      <RouterView />
+      <RouterView @callAlert="(data) => {notification = data}" />
     </template>
   </div>
 </template>

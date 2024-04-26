@@ -21,7 +21,7 @@ const maskcnpj = reactive({
 })
 
 const maskphone = reactive({
-    mask: "(##)#.####-####",
+    mask: "(##)9.####-####",
     eager: true
 })
 

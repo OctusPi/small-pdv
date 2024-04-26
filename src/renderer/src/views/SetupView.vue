@@ -1,13 +1,50 @@
 <script setup>
 import { ref } from 'vue'
-import ctrl from '../services/controller'
-import masks from "@renderer/utils/masks.js"
+import Controller from '../services/controller'
+import masks from "@renderer/utils/masks"
+import forms from '@renderer/services/forms'
+import notifys from '@renderer/utils/notifys'
 
-const page = ref({})
+const controller = new Controller()
+const emit = defineEmits(['callAlert'])
+const page = ref({
+  data: {},
+  rules: {
+    fields: {
+      company: 'required',
+      address: 'required',
+      phone: 'required',
+      admpass: 'required'
+    },
+    valids: {}
+  }
+})
 
-const ipcHandle = () => {
-  
+function saveSetup() {
+  const validation = forms.checkform(page.value.data, page.value.rules);
+  if (!validation.isvalid) {
+    emit('callAlert', notifys.warning(validation.message))
+    return
+  }
+
+  controller.send('Setting.save', {...page.value.data})
+  controller.listen((data) => {
+    emit('callAlert', data)
+  })
 }
+
+function handleFile(event) {
+  const file = event.target.files[0]
+  if (file) {
+    const imgUrl = URL.createObjectURL(file)
+    page.value.data.file = file
+    page.value.data.imgUrl = file.path
+
+    console.log(imgUrl)
+    console.log(file)
+  }
+}
+
 </script>
 
 <template>
@@ -22,48 +59,37 @@ const ipcHandle = () => {
       </header>
 
       <div class="company-pic text-center mb-4 d-flex align-items-center justify-content-center">
-        <span class="small text-secondary d-block">Selecionar logomarca</span>
-        <input type="file" name="pic" class="company-pic-input" />
+        <img v-if="page.data.imgUrl" :src="page.data.imgUrl" class="img-logo">
+        <span v-else class="small text-secondary d-block">Selecionar logomarca</span>
+
+        <input @change="handleFile" type="file" name="pic" class="company-pic-input" />
       </div>
-      <form class="form-row g-3 mb-3" @submit.prevent="elevateAccess">
+      <form class="form-row g-3 mb-3" @submit.prevent="saveSetup">
         <div class="col-12">
           <label for="company" class="form-label text-start">Nome da Empresa</label>
-          <input
-            id="company"
-            v-model="page.company"
-            type="text"
-            class="form-control"
-            placeholder="Digite o nome da sua Empresa"
-          />
+          <input id="company" v-model="page.data.company" type="text" 
+          :class="{ 'form-control-alert': page.rules.valids.company }"
+          class="form-control"
+            placeholder="Digite o nome da sua Empresa" />
         </div>
         <div class="col-12">
           <label for="address" class="form-label text-start">Endereço</label>
-          <input
-            type="text"
-            class="form-control"
-            id="address"
-            placeholder="Logradouro, n - Bairro, Cidade"
-            v-model="address"
-          />
+          <input type="text" class="form-control" id="address" placeholder="Logradouro, n - Bairro, Cidade"
+            v-model="page.data.address" :class="{ 'form-control-alert': page.rules.valids.address }" />
         </div>
         <div class="col-12">
           <label for="phone" class="form-label text-start">Telefone</label>
-          <input
-            type="text"
-            class="form-control"
-            id="phone"
-            placeholder="(00)9.0000-0000"
-            v-maska:[masks.maskphone]
-            v-model="phone"
-          />
+          <input type="text" class="form-control" id="phone" placeholder="(00)9.0000-0000" v-maska:[masks.maskphone]
+            v-model="page.data.phone" :class="{ 'form-control-alert': page.rules.valids.phone }" />
         </div>
         <div class="col-12">
           <label for="admpass" class="form-label text-start">Senha Administrador</label>
-          <input type="password" class="form-control" id="admpass" v-model="page.admpass" />
+          <input type="password" class="form-control" id="admpass" v-model="page.data.admpass"
+          :class="{ 'form-control-alert': page.rules.valids.admpass }" />
         </div>
 
         <footer class="text-center mt-4">
-          <button @click="ipcHandle" type="submit" class="btn btn-setup">
+          <button type="submit" class="btn btn-setup">
             <i class="bi bi-arrow-right"></i>
           </button>
         </footer>
@@ -76,6 +102,7 @@ const ipcHandle = () => {
 .cotainer-setup {
   width: 100%;
 }
+
 .box-setup {
   width: 400px;
 }
@@ -86,6 +113,11 @@ const ipcHandle = () => {
   border-radius: 10px;
   border: 2px dashed var(--color-input-border);
   position: relative;
+}
+
+.img-logo {
+  height: 140px;
+  border-radius: 10px;
 }
 
 .company-pic-input {

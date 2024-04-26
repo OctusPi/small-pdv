@@ -25,22 +25,20 @@ onMounted(() => {
 <template>
     
     <div class="modal fade" id="passModal" tabindex="-1" aria-labelledby="passModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered show">
             <div class="modal-content">
                 <div class="modal-header px-4 border-0">
                     <h1 class="modal-title fs-6" id="passModalLabel"><i class="bi bi-lock"></i> Acesso Administrativo</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form @submit.prevent="elevateAdmin">
+                <form @submit.prevent="elevateAccess">
                     <div class="modal-body px-4">
                         <div class="text-center mb-2">
                             <i class="bi bi-lock fs-1"></i>
                             <p>Desbloquear funcionalidades administrativas do Sistema. Registro e Gestão de Taras, Produtos e Emissão de Relatórios</p>
                         </div>
-                        <form class="mb-3 text-center" @submit.prevent="elevateAccess">
-                            <label for="admpass" class="form-label">Senha do Administrador</label>
-                            <input type="password" class="form-control" id="admpass" v-model="admpass">
-                        </form>
+                        <label for="admpass" class="form-label">Senha do Administrador</label>
+                        <input type="password" class="form-control" id="admpass" v-model="admpass">
                     </div>
                     <div class="modal-footer border-0 px-4 mb-3">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
