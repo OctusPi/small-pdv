@@ -1,18 +1,50 @@
-import { DataTypes} from 'sequelize';
-import conn from '../conn';
+import path from'node:path'
+import { Model, DataTypes, Sequelize} from 'sequelize';
 
-const Product = conn.define(
-  'Product',
-  {
-    id:{ type: DataTypes.BIGINT, primaryKey:true, autoIncrement:true },
-    cod: {type: DataTypes.STRING, allowNull: false},
-    name: {type: DataTypes.STRING, allowNull: false},
-    sale: {type: DataTypes.INTEGER, allowNull: false},
-    unitpeso: {type: DataTypes.DOUBLE, allowNull: true},
-    unitval: {type: DataTypes.DOUBLE, allowNull: false},
-    pic: {type: DataTypes.STRING},
-    description: {type: DataTypes.STRING},
-  }
-);
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, 'database.sqlite')
+});
+
+
+class Product extends Model {}
+Product.init({
+    id:{ 
+      type: DataTypes.BIGINT, 
+      autoIncrement:true,
+      primaryKey:true
+    },
+    cod: {
+      type: DataTypes.STRING, 
+      allowNull: false
+    },
+    name: {
+      type: DataTypes.STRING, 
+      allowNull: false
+    },
+    sale: {
+      type: DataTypes.INTEGER, 
+      allowNull: false
+    },
+    unitpeso: {
+      type: DataTypes.DOUBLE, 
+      allowNull: true
+    },
+    unitval: {
+      type: DataTypes.DOUBLE, 
+      allowNull: false
+    },
+    pic: {
+      type: DataTypes.STRING
+    },
+    description: {
+      type: DataTypes.STRING
+    },
+},{
+  sequelize,
+  timestamps: false
+})
+
 
 export default Product

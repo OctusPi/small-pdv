@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { RouterView} from 'vue-router';
 import Controller from './services/controller'
 import NavMain from './components/NavMain.vue';
@@ -8,16 +8,20 @@ import SetupView from './views/SetupView.vue'
 
 const controller = new Controller()
 
-const setupView = ref(true)
+const setupView = ref(false)
 
 function callSetup(){
-  controller.send('setting.list', {})
+  controller.send('Setting.one', {})
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   callSetup()
-  controller.listen((data) => setupView.value = data)
-  console.log(data)
+  controller.listen((data) => {
+    setupView.value = data
+    console.log(typeof data)
+    console.log(setupView.value)
+  })
+
 })
 
 </script>

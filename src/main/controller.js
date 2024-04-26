@@ -1,6 +1,4 @@
 import { ipcMain, MessageChannelMain } from 'electron'
-import exec from 'child_process'
-import conn from './conn'
 import models from './models'
 
 class Controller{
@@ -10,7 +8,7 @@ class Controller{
 
     listen(){
         ipcMain.on('ping', (event, data) => {
-            this.exec_action()
+            this.exec_query(data)
         })
     }
 
@@ -27,40 +25,24 @@ class Controller{
         }
     }
 
-    async exec_action(){
-        const users = await models['setting'].findAll().then((result) => {
-            console.log(users.every(result => result instanceof User)); // true
-            console.log('All users:', JSON.stringify(result, null, 2));
-            console.log(JSON.stringify(result, null, 2))
-            this.send(result)
-        })
-        
+    async exec_query(data){
+        const action = this.define_action(data)
+        const model  = models[action.model]
+        const method = action.method
+        const query  = await this.define_query(model, method)
+        console.log(JSON.stringify(query))
+        this.send(query)
     }
 
-    async execute_query(model, action, data){
-       conn.authenticate().then(async () => {
-            switch(action){
-                case 'list':
-                    const k = await model.findAll().then(m => m)
-                    return k
-                case 'details':
-                    return model.findOne({where:data}).then(m => m)
-
-                default:
-                    return null
-                // case 'save':
-                //     console.log('save: '+data)
-                //     break
-                // case 'update':
-                //     console.log('update: '+data)
-                //     break
-                // case 'remove':
-                //     console.log('remove: '+data)
-                //     break
-            }
-        }).catch(err => {
-            return 'Falha ao Conectar'
-        })
+    async define_query(model, method, data = null){
+        switch(method){
+            case 'all':
+                return await model.findAll()
+            case 'one':
+                return await model.findOne(data ?? {})
+            default:
+                return null
+        }
     }
 
 }

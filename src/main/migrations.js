@@ -34,27 +34,6 @@ function creteTableSettings(db){
             token VARCHAR (255)
         )`)
     })
-
-    db.serialize(() => {
-        db.run(`INSERT INTO Settings (
-            token,
-            adminpass,
-            phone,
-            address,
-            company,
-            logomarca,
-            id
-        )
-        VALUES (
-            'teste',
-            'teste',
-            'teste',
-            'teste',
-            'teste',
-            'teste',
-            1
-        )`)
-    })
 }
 
 function creteTableTares(db){

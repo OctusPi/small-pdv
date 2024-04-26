@@ -4,8 +4,8 @@ import Tare from './tare'
 import Setting from './setting'
 
 export default {
-    order: Order,
-    product: Product,
-    tare: Tare,
-    setting: Setting
+    Order,
+    Product,
+    Tare,
+    Setting
 }
