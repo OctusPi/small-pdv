@@ -26,7 +26,7 @@ function creteTableSettings(db){
     db.serialize(() => {
         db.run(`CREATE TABLE IF NOT EXISTS Settings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            logomarca VARCHAR (255),
+            logomarca TEXT,
             company VARCHAR (255),
             address VARCHAR (255),
             phone VARCHAR (255),

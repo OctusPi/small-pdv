@@ -26,17 +26,12 @@ class Controller{
         }
     }
 
-    async exec_query(data){
-        const action = this.define_action(data)
-        const model  = models[action.model]
-        const method = action.method
-        const query  = await this.define_query(model, method)
-        console.log(JSON.stringify(query))
-        this.send(query)
-    }
-
     async define_query(model, method, data = null){
         switch(method){
+            case 'setup_check':
+                return { setup: { value: await model.findOne() } }
+            case 'setup_save':
+                return { setup: { value: await this.save_setup(data) } }
             case 'all':
                 return await model.findAll()
             case 'one':
@@ -46,6 +41,20 @@ class Controller{
             default:
                 return null
         }
+    }
+
+    async exec_query(data){
+        const action = this.define_action(data)
+        const model  = models[action.model]
+        const method = action.method
+        const query  = await this.define_query(model, method, data?.data)
+        console.log(JSON.stringify(query))
+        this.send(query)
+    }
+
+    async save_setup(data){
+        const setting = await models['Setting'].create(data)
+        return {setup:{value:setting.toJSON()}}
     }
 
 }
