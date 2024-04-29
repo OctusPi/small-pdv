@@ -1,30 +1,27 @@
 <script setup>
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, onMounted, ref } from 'vue'
 import { RouterView } from 'vue-router';
-import Controller from './services/controller'
+import Ipc from './services/ipc'
 import NavMain from './components/NavMain.vue';
 import ModalDelete from './components/ModalDelete.vue';
 import SetupView from './views/SetupView.vue'
 import NotificationUI from './components/NotificationUI.vue';
 
-const controller = new Controller()
+const ipc = new Ipc()
 const setupView = ref(true)
 const datalist = ref([])
 const notification = ref({ show: false, data: { type: 'success', msg: '' } })
 const remove = ref({})
 
 onBeforeMount(() => {
-	controller.send('Setting.setup_check', {})
-	controller.listen((data) => { 
-		if(data.setup){
-			setupView.value = data.setup.value
-		}
-	 })
+	ipc.request('setup_check', {action: 'Setting.one', data: {}}, (data) => {
+		setupView.value = data
+	})
 })
-
 </script>
 
 <template>
+
 
 	<NotificationUI :alert="notification" />
 

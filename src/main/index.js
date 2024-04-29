@@ -1,9 +1,14 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
-import Controller from './controller'
+import fs from 'fs'
 import migrations from './migrations'
+import token from './security/token'
+import utils from './utils/utils'
+import Ipc from './ipc'
+import Controller from './controller'
 
 
 function createWindow() {
@@ -20,10 +25,34 @@ function createWindow() {
     }
   })
 
-  const controller = new Controller(mainWindow.webContents)
+  const ipc = new Ipc(mainWindow.webContents)
+  const controller = new Controller()
 
   migrations.createTables()
-  controller.listen()
+
+  ipc.request('setup_check',  async (data) => {
+    if(data.action === 'Setting.save'){
+      data.data.token = token.encode(data.data.adminpass)
+    }
+    const exec = await controller.exec_query(data)
+    ipc.response(data.listen, exec)
+  })
+
+  ipc.request('big_boss',  async (data) => {
+    const exec = await controller.exec_query(data)
+    ipc.response(data.listen, exec)
+  })
+
+  ipc.request('upload_image', (data) => {
+    const upDir = path.join(app.getPath('userData'), 'uploads')
+    if(!fs.existsSync(upDir)){
+      fs.mkdirSync(upDir, {recursive: true})
+    }
+
+    const filePath = path.join(upDir, utils.rdname(10)+'.jpeg')
+    fs.writeFile(filePath, Buffer.from(data.image, 'base64'), (err) => { console.log(err)})
+    ipc.response(data.listen, filePath)
+  })
 
   mainWindow.on('ready-to-show', () => {
     

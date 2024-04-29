@@ -1,11 +1,11 @@
 <script setup>
 import { ref } from 'vue'
-import Controller from '../services/controller'
+import Ipc from '../services/ipc'
 import masks from "@renderer/utils/masks"
 import forms from '@renderer/services/forms'
 import notifys from '@renderer/utils/notifys'
 
-const controller = new Controller()
+const ipc  = new Ipc()
 const emit = defineEmits(['callAlert'])
 const page = ref({
 	data: {},
@@ -30,20 +30,20 @@ function saveSetup() {
 
 	//save img
 	if (page.value.uploads.file) {
-		const file    = page.value.uploads.file
 		const reader  = new FileReader()
 		reader.onload = () =>{
-			const conteudo = reader.result
-			const base64 = btoa(String.fromCharCode.apply(null, new Uint8Array(conteudo)))
-			page.value.data.logomarca = base64
+			const conteudo  = reader.result
+			const imageData = btoa(String.fromCharCode(null, new Uint8Array(conteudo))) 
+			ipc.request('upload_image', {image: imageData}, (data) => {
+				page.value.data.logomarca = data
+				ipc.request('setup_check', {action: 'Setting.save', data: {...page.value.data}})
+			})
 		}
-		reader.readAsArrayBuffer(file)
+		reader.readAsArrayBuffer(page.value.uploads.file)
+		return
 	}
 
-	//adicionar metodo de geracao de token de recuperacao no futuro
-	page.value.data.token = 'tokenize'
-
-	controller.send('Setting.setup_save', { ...page.value.data })
+	ipc.request('setup_check', {action: 'Setting.save', data: {...page.value.data}})
 }
 
 function handleFile(event) {
@@ -71,7 +71,7 @@ function handleFile(event) {
 				<img v-if="page.uploads.url" :src="page.uploads.url" class="img-logo">
 				<span v-else class="small text-secondary d-block">Selecionar logomarca</span>
 
-				<input @change="handleFile" type="file" name="pic" class="company-pic-input" />
+				<input @change="handleFile" type="file" name="pic" class="company-pic-input" required />
 			</div>
 			<form class="form-row g-3 mb-3" @submit.prevent="saveSetup">
 				<div class="col-12">

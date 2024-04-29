@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import sqlite3 from 'sqlite3'
 
-const dbPath = path.join(__dirname, 'database.sqlite')
+const dbPath = 'database.sqlite'
 
 function createTables(){
     if(!fs.existsSync(dbPath)){

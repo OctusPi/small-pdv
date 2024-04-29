@@ -23,6 +23,7 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "electron-updater": "^6.1.7",
+    "jsonwebtoken": "^9.0.2",
     "maska": "^2.1.11",
     "sequelize": "^6.37.3",
     "sqlite3": "^5.1.7",
