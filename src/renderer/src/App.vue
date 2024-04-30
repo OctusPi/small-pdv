@@ -14,7 +14,7 @@ const notification = ref({ show: false, data: { type: 'success', msg: '' } })
 const remove = ref({})
 
 onBeforeMount(() => {
-	ipc.request('setup_check', {action: 'Setting.one', data: {}}, (data) => {
+	ipc.request('setup_conf', {action: 'Setting.one', data: {}}, (data) => {
 		setupView.value = data
 	})
 })

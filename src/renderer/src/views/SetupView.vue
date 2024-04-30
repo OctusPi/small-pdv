@@ -30,20 +30,19 @@ function saveSetup() {
 
 	//save img
 	if (page.value.uploads.file) {
+		
+		const file = page.value.uploads.file
 		const reader  = new FileReader()
-		reader.onload = () =>{
-			const conteudo  = reader.result
-			const imageData = btoa(String.fromCharCode(null, new Uint8Array(conteudo))) 
-			ipc.request('upload_image', {image: imageData}, (data) => {
-				page.value.data.logomarca = data
-				ipc.request('setup_check', {action: 'Setting.save', data: {...page.value.data}})
-			})
+		reader.readAsDataURL(file)
+		
+		reader.onloadend = () =>{
+			page.value.data.logomarca = reader.result.replace(/^data:image\/[a-z]+;base64,/, "")
+			ipc.request('setup_conf', {action: 'Setting.save', data: {...page.value.data}})
 		}
-		reader.readAsArrayBuffer(page.value.uploads.file)
 		return
 	}
 
-	ipc.request('setup_check', {action: 'Setting.save', data: {...page.value.data}})
+	ipc.request('setup_conf', {action: 'Setting.save', data: {...page.value.data}})
 }
 
 function handleFile(event) {

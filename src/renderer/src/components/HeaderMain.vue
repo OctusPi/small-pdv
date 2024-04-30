@@ -36,7 +36,11 @@ function logOut(){
 }
 
 function recoverPass(){
-    console.log('dump guy')
+    ipc.request('setup_conf', {action: 'Setting.destroy', data:{token:page.value.data.tokenapp}}, (fail) => {
+        if(fail){
+            emit('callAlert', notifys.warning('Token de validação incorreto...'))
+        }
+    })
 }
 
 onMounted(() => {
@@ -63,6 +67,7 @@ onMounted(() => {
                         <div class="text-center mb-2">
                             <i class="bi bi-braces fs-1"></i>
                             <p>Informe o token de configuração do App para recuperar sua senha de administrador!</p>
+                            <p class="text-danger">Está ação irá remover as configurações inicial do sistema, sendo necessário informa-las novamente. Não se preocupe, nenhum outro dado será removido...</p>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <label for="tokenapp" class="form-label">Token App</label>
@@ -72,7 +77,7 @@ onMounted(() => {
                     </div>
                     <div class="modal-footer border-0 px-4 mb-3">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
-                        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Confirmar</button>
+                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal"><i class="bi bi-check-circle"></i> Confirmar</button>
                     </div>
                 </form>
                 <form v-else @submit.prevent="elevateAccess">
@@ -124,7 +129,9 @@ onMounted(() => {
 
 <style scoped>
     .header-main{
-        width: 100%;
+        width: calc(100% - 120px);
+        position: fixed;
+
         background-color: var(--color-base);
         color: white;
     }

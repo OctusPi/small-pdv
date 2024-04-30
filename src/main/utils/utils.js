@@ -1,5 +1,5 @@
 
-function rdname(tamanho) {
+function rdcode(tamanho) {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     
     let nome = '';
@@ -11,5 +11,5 @@ function rdname(tamanho) {
   }
 
 export default {
-    rdname
+    rdcode
 }
