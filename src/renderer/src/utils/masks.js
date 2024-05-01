@@ -47,6 +47,11 @@ const masknumbs = reactive({
     eager: true,
 })
 
+const maskpeso = reactive({
+    mask: "#.###",
+    eager: true,
+})
+
 export default{
     maskcep,
     maskdate,
@@ -54,5 +59,6 @@ export default{
     maskcnpj,
     maskphone,
     maskmoney,
-    masknumbs
+    masknumbs,
+    maskpeso
 }

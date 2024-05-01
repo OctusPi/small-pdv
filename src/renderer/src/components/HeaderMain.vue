@@ -19,7 +19,7 @@ const page  = ref({
 })
 
 function elevateAccess(){
-    ipc.request('big_boss', {action: 'Setting.one', data: {adminpass: page.value.data.adminpass}}, (data) => {
+    ipc.request('query_db', {action: 'Setting.one', data: {adminpass: page.value.data.adminpass}}, (data) => {
         if(data !== null){
             store.setAdmin(data.dataValues)
             page.value.isadmin = true

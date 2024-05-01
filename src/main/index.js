@@ -87,28 +87,9 @@ function createWindow() {
         }
     });
 
-    ipc.request("big_boss", async (data) => {
+    ipc.request("query_db", async (data) => {
         const exec = await controller.exec_query(data);
         ipc.response(data.listen, exec);
-    });
-
-    ipc.request("upload_image", (data) => {
-        const upDir = "uploads";
-        if (!fs.existsSync(upDir)) {
-            fs.mkdirSync(upDir, { recursive: true });
-        }
-
-        const filePath = path.join(upDir, utils.rdcode(12) + ".jpg");
-        fs.writeFile(filePath, Buffer.from(data.image, "base64"), (err) => {
-            if (err) {
-                dialog.showMessageBox(
-                    mainWindow,
-                    { message: "Falha ao salvar image" },
-                    () => null,
-                );
-            }
-        });
-        ipc.response(data.listen, filePath);
     });
 
     mainWindow.on("ready-to-show", () => {

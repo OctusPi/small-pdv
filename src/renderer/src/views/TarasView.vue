@@ -1,16 +1,23 @@
 <script setup>
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
     import Ipc from '../services/ipc'
-    import store from './../stores/local';
     import masks from './../utils/masks'
     import forms from './../services/forms'
     import notifys from '@renderer/utils/notifys'
     import HeaderMain from '../components/HeaderMain.vue';
+    import TableList from '../components/TableList.vue'
 
     const emit = defineEmits(['callAlert'])
     const ipc = new Ipc()
     const page = ref({
         data:{},
+        dataheader:[
+            {key:'name', title:'IDENTIFICAÇÃO'},
+            {key:'weight', title:'PESO'},
+            {key:'type', title:'TIPO'},
+            {key:'description', title:'DESCRIÇÃO'}
+        ],
+        datalist:[],
         views:{register: false, list:true },
         preview:{},
         selects:{
@@ -21,7 +28,11 @@
         },
         uploads:{},
         rules:{
-            fields:{},
+            fields:{
+                name:'required',
+                weight:'required',
+                type: 'required'
+            },
             valids:{}
         }
     })
@@ -31,9 +42,50 @@
         page.value.views.list = !page.value.views.list
     }
 
-    function saveData(){
-        console.log(page.value.data)
+    function listData(){
+        ipc.request('query_db', {action:'Tare.all', data:{}}, (datalist) => {
+            console.log(datalist)
+            if(datalist){ page.value.datalist = datalist.map((obj) => obj.dataValues) }
+        })
     }
+
+    function saveData(){
+
+        const validation = forms.checkform(page.value.data, page.value.rules);
+        if (!validation.isvalid) {
+            emit('callAlert', notifys.warning(validation.message))
+            return
+        }
+
+        const action = page.value.data.id ? 'update' : 'save'
+        ipc.request('query_db', {action:`Tare.${action}`, data: {...page.value.data}}, (data) => {
+            if(data){
+                emit('callAlert', notifys.success('Registro salvo com sucesso!'))
+                toggleView()
+                return
+            }
+            
+            emit('callAlert', notifys.warning('Falha ao gravar dados!'))
+        })
+        listData()
+    }
+
+    function handleFile(event) {
+	    const file = event.target.files[0]
+        if (file) {
+
+            const reader  = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onloadend = () =>{
+                page.value.data.pic = reader.result.replace(/^data:image\/[a-z]+;base64,/, "")
+            }
+            page.value.uploads.url = file.path
+        }
+    }
+
+    onMounted(() => {
+        listData()
+    })
 
 </script>
 
@@ -46,8 +98,9 @@
         <div class="section-main d-md-flex justify-content-between">
             
             <div class="ioview m-2">
+                
                 <!-- action bar -->
-                <nav class="text-end p-0">
+                <nav v-if="!page.views.register" class="text-end p-0">
                     <button @click="toggleView" type="button" class="btn btn-lg btn-primary">
                         <i class="bi bi-plus-circle"></i> Adicionar
                     </button>
@@ -71,7 +124,7 @@
                             <label for="weight" class="form-label text-start">Peso (gramas) <span class="small text-danger">*</span></label>
                             <input id="weight" v-model="page.data.weight" type="text"
                                 :class="{ 'form-control-alert': page.rules.valids.weight }" class="form-control"
-                                placeholder="0.00" />
+                                placeholder="0.000" v-maska:[masks.maskpeso] />
                         </div>
                         <div class="col-4">
                             <label for="type" class="form-label text-start">Tipo <span class="small text-danger">*</span></label>
@@ -100,8 +153,11 @@
                 </div>
 
                 <!-- box list -->
-                <div v-show="page.views.list" class="inside-container">
-                    Lista de Dados
+                <div v-show="page.views.list" class="inside-container mt-4">
+                    <TableList 
+                    :header="page.dataheader"
+                    :body="page.datalist"
+                    :casts="{'type':page.selects.types}"/>
                 </div>
             </div>
 
@@ -128,10 +184,10 @@
                         
                     </div>
                     <div class="actionsbtns text-center">
-                        <button type="button" class="btn btn-lg btn-primary me-2">
+                        <button type="button" class="btn btn-primary me-2">
                             <i class="bi bi-pen"></i> Editar
                         </button>
-                        <button type="button" class="btn btn-lg btn-danger">
+                        <button type="button" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Excluir
                         </button>
                     </div>
