@@ -20,7 +20,6 @@ const page  = ref({
 
 function elevateAccess(){
     ipc.request('big_boss', {action: 'Setting.one', data: {adminpass: page.value.data.adminpass}}, (data) => {
-        console.log(data)
         if(data !== null){
             store.setAdmin(data.dataValues)
             page.value.isadmin = true
@@ -39,7 +38,9 @@ function recoverPass(){
     ipc.request('setup_conf', {action: 'Setting.destroy', data:{token:page.value.data.tokenapp}}, (fail) => {
         if(fail){
             emit('callAlert', notifys.warning('Token de validação incorreto...'))
+            return
         }
+        logOut()
     })
 }
 
@@ -131,9 +132,9 @@ onMounted(() => {
     .header-main{
         width: calc(100% - 120px);
         position: fixed;
-
-        background-color: var(--color-base);
+        z-index: 3000;
         color: white;
+        background-color: var(--color-base);
     }
 
     .header-main h1{

@@ -40,6 +40,7 @@ function creteTableTares(db){
     db.serialize(() => {
         db.run(`CREATE TABLE IF NOT EXISTS Tares (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR (255),
             weight [DOUBLE PRECISION],
             type INTEGER,
             pic VARCHAR (255),

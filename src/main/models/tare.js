@@ -16,6 +16,9 @@ Tare.init({
       autoIncrement:true, 
       primaryKey:true
     },
+    name: {
+      type: DataTypes.STRING
+    },
     weight: {
       type: DataTypes.DOUBLE, 
       allowNull:false

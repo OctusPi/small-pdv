@@ -20,7 +20,7 @@ class Controller{
                 return exec.toJSON()
             case 'update':
                 exec = await model.update(data.values, {where:data.where})
-                return exec.toJSON()
+                return exec
             case 'destroy':
                 exec = await model.destroy({where:data})
                 return exec

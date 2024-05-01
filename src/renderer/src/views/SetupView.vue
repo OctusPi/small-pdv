@@ -28,27 +28,18 @@ function saveSetup() {
 		return
 	}
 
-	//save img
-	if (page.value.uploads.file) {
-		
-		const file = page.value.uploads.file
-		const reader  = new FileReader()
-		reader.readAsDataURL(file)
-		
-		reader.onloadend = () =>{
-			page.value.data.logomarca = reader.result.replace(/^data:image\/[a-z]+;base64,/, "")
-			ipc.request('setup_conf', {action: 'Setting.save', data: {...page.value.data}})
-		}
-		return
-	}
-
 	ipc.request('setup_conf', {action: 'Setting.save', data: {...page.value.data}})
 }
 
 function handleFile(event) {
 	const file = event.target.files[0]
 	if (file) {
-		page.value.uploads.file = file
+
+		const reader  = new FileReader()
+		reader.readAsDataURL(file)
+		reader.onloadend = () =>{
+			page.value.data.logomarca = reader.result.replace(/^data:image\/[a-z]+;base64,/, "")
+		}
 		page.value.uploads.url = file.path
 	}
 }

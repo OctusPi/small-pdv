@@ -58,6 +58,11 @@ function createWindow() {
             ipc.response(data.listen, exec);
         }
 
+        async function update_setup(data) {
+            const exec = await controller.exec_query(data);
+            ipc.response(data.listen, exec);
+        }
+
         async function destroy_setup(data) {
             const exec = await controller.exec_query(data);
             ipc.response(data.listen, !exec);
@@ -70,6 +75,10 @@ function createWindow() {
 
             case "Setting.save":
                 await save_setup(data);
+                break;
+            
+            case "Setting.update":
+                await update_setup(data);
                 break;
 
             case "Setting.destroy":

@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Inter';
+  src: url('inter.ttf') format('ttf')
+}
+
 :root{
   --color-fundo: #edf6fd;
   --color-box: #ffffff;
@@ -36,7 +41,7 @@
   --color-warning-dark: #a16704;
   --color-danger-dark: #7e1c29;
 
-  --border-box: 1px solid #b2cadd;
+  --border-box: 1px solid #e0e7ee;
 }
 
 .dark:root{
@@ -124,4 +129,41 @@ button, input[type="submit"], input[type="reset"] {
 	font: inherit;
 	cursor: pointer;
 	outline: inherit;
+}
+
+select option{
+  padding: 10px;
+  font-weight: 1.3rem;
+}
+
+/* Estiliza a scrollbar para todos os elementos */
+::-webkit-scrollbar {
+  width: 1px;
+}
+
+/* Estiliza o botão da scrollbar */
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+}
+
+/* Estiliza o rastreador da scrollbar */
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Estiliza o trilho da scrollbar */
+::-webkit-scrollbar-track-piece {
+  background-color: transparent;
+}
+
+/* Estiliza o thumb (a parte rolável) da scrollbar */
+::-webkit-scrollbar-thumb {
+  background-color: #888; /* Cor da thumb */
+  border-radius: 0; /* Remove o arredondamento da thumb */
+}
+
+/* Estiliza o canto entre a thumb e o trilho */
+::-webkit-scrollbar-corner {
+  background-color: transparent;
 }
