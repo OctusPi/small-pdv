@@ -6,7 +6,7 @@ function load(status = true){
 }
 
 function rdname(tamanho) {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     
     let nome = '';
     for (let i = 0; i < tamanho; i++) {
@@ -14,9 +14,19 @@ function rdname(tamanho) {
     }
   
     return nome;
-  }
+}
+
+function toCurrency(value){
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function toDouble(value){
+  return parseFloat(value.replace(',', '.'))
+}
 
 export default {
     load,
-    rdname
+    rdname,
+    toCurrency,
+    toDouble
 }

@@ -2,6 +2,7 @@
     import { onMounted, ref, watch } from 'vue';
     import Ipc from '../services/ipc'
     import masks from './../utils/masks'
+    import utils from './../utils/utils'
     import forms from './../services/forms'
     import notifys from '@renderer/utils/notifys'
     import HeaderMain from '../components/HeaderMain.vue';
@@ -15,26 +16,29 @@
     const page = ref({
         data:{},
         dataheader:[
+            {key:'cod', title:'COD'},
             {key:'name', title:'IDENTIFICAÇÃO'},
-            {key:'weight', title:'PESO'},
-            {key:'type', title:'TIPO'},
+            {key:'sale', title:'VENDA'},
+            {key:'unitval', title:'VALOR'},
+            {key:'unitpeso', title:'PESO'},
             {key:'description', title:'DESCRIÇÃO'}
         ],
         datalist:[],
         views:{register: false, list:true },
         preview:{},
         selects:{
-            types:[
-                {id:1, title:'Descatável/Delivery'},
-                {id:2, title:'Permanente/Local'}
+            sales:[
+                {id:1, title:'Por Peso'},
+                {id:2, title:'Por Unidade'}
             ]
         },
         uploads:{},
         rules:{
             fields:{
-                name:'required',
-                weight:'required',
-                type: 'required'
+                cod:'required',
+                sale:'required',
+                name: 'required',
+                unitval: 'required',
             },
             valids:{}
         }
@@ -42,7 +46,7 @@
 
     watch(() => props.updateList, (newdata) => {
         if(newdata > 0){
-            ipc.request('query_db', {action:'Tare.all', data:{}})
+            ipc.request('query_db', {action:'Product.all', data:{}})
             page.value.preview = {}
         }
     })
@@ -51,6 +55,7 @@
 
         switch (view) {
             case 'register':
+                page.value.data.cod = page.value.data.cod ?? utils.rdname(8)
                 page.value.views.register = true
                 page.value.views.list = false
                 break;
@@ -65,7 +70,7 @@
     }
 
     function listData(){
-        ipc.request('query_db', {action:'Tare.all', data:{}}, (datalist) => {
+        ipc.request('query_db', {action:'Product.all', data:{}}, (datalist) => {
             if(datalist && Array.isArray(datalist)){
                 page.value.datalist = datalist.map((obj) => obj.dataValues)
             }
@@ -80,16 +85,18 @@
             return
         }
 
-        const action = `Tare.${page.value.data.id ? 'update' : 'save'}`
+         //convert monetary values
+         page.value.data.unitval = utils.toDouble(page.value.data.unitval)
+
+        const action = `Product.${page.value.data.id ? 'update' : 'save'}`
         const data = page.value.data.id 
         ? {values:{...page.value.data}, where:{id:page.value.data.id}}
         : {...page.value.data}
 
-
         ipc.request('query_db', {action, data}, (data) => {
             if(data){
                 toggleView()
-                ipc.request('query_db', {action:'Tare.all', data:{}})
+                ipc.request('query_db', {action:'Product.all', data:{}})
                 emit('callAlert', notifys.success('Registro salvo com sucesso!'))
             }else{
                 emit('callAlert', notifys.warning('Falha ao gravar dados!'))
@@ -106,7 +113,7 @@
 
     function deleteData(){
 
-        emit('callRemove', {action:'Tare.destroy', data:{id:page.value.preview.id}})
+        emit('callRemove', {action:'Product.destroy', data:{id:page.value.preview.id}})
     }
 
     function selectItem(id){
@@ -157,26 +164,41 @@
                         <input @change="handleFile" type="file" name="pic" class="company-pic-input" required />
 			        </div>
                     <form @submit.prevent="saveData" class="row g-2 mb-3">
-                        <div class="col-4">
-                            <label for="name" class="form-label text-start">Identificação Tara <span class="small text-danger">*</span></label>
+                        
+                        <div class="col-12">
+                            <label for="name" class="form-label text-start">Nome do Produto <span class="small text-danger">*</span></label>
                             <input id="name" v-model="page.data.name" type="text"
                                 :class="{ 'form-control-alert': page.rules.valids.name }" class="form-control"
-                                placeholder="Nome Identificador" />
+                                placeholder="Identificação do Produto"  />
                         </div>
-                        <div class="col-4">
-                            <label for="weight" class="form-label text-start">Peso (gramas) <span class="small text-danger">*</span></label>
-                            <input id="weight" v-model="page.data.weight" type="text"
-                                :class="{ 'form-control-alert': page.rules.valids.weight }" class="form-control"
-                                placeholder="0.000" v-maska:[masks.maskpeso] />
+                        <div class="col-3">
+                            <label for="cod" class="form-label text-start">Código <span class="small text-danger">*</span></label>
+                            <input id="cod" v-model="page.data.cod" type="text"
+                                :class="{ 'form-control-alert': page.rules.valids.cod }" class="form-control"
+                                placeholder="Código Produto" />
                         </div>
-                        <div class="col-4">
-                            <label for="type" class="form-label text-start">Tipo <span class="small text-danger">*</span></label>
-                            <select id="type" v-model="page.data.type"
-                                :class="{ 'form-control-alert': page.rules.valids.type }" class="form-control">
+                        <div class="col-3">
+                            <label for="sale" class="form-label text-start">Tipo de Venda <span class="small text-danger">*</span></label>
+                            <select id="sale" v-model="page.data.sale"
+                                :class="{ 'form-control-alert': page.rules.valids.sale }" class="form-control">
                                 <option></option>
-                                <option v-for="s in page.selects.types" :key="s.id" :value="s.id">{{ s.title }}</option>                        
+                                <option v-for="s in page.selects.sales" :key="s.id" :value="s.id">{{ s.title }}</option>                        
                             </select>
                         </div>
+                        <div class="col-3">
+                            <label for="unitval" class="form-label text-start">Valor R$ <span class="small text-danger">*</span></label>
+                            <input id="unitval" v-model="page.data.unitval" type="text"
+                                :class="{ 'form-control-alert': page.rules.valids.unitval }" class="form-control"
+                                placeholder="R$0,00" v-maska:[masks.maskmoney] />
+                        </div>
+
+                        <div class="col-3">
+                            <label for="unitpeso" class="form-label text-start">Peso (gramas) <span class="small text-danger">*</span></label>
+                            <input id="unitpeso" v-model="page.data.unitpeso" type="text"
+                                :class="{ 'form-control-alert': page.rules.valids.unitpeso }" class="form-control"
+                                placeholder="0.000" v-maska:[masks.maskpeso] />
+                        </div>
+                        
                         <div class="col-12">
                             <label for="description" class="form-label text-start">Descrição (opcional)</label>
                             <input id="description" v-model="page.data.description" type="text"
@@ -200,7 +222,7 @@
                     <TableList 
                     :header="page.dataheader"
                     :body="page.datalist"
-                    :casts="{'type':page.selects.types}"
+                    :casts="{'sale':page.selects.sales}"
                     @callSelection="selectItem"/>
                 </div>
             </div>
@@ -212,15 +234,21 @@
                             <img :src="`data:image/png;base64,${page.preview.pic}`" class="img-preview">
                         </div>
 
+                        <h2>Código</h2>
+                        <p>{{ page.preview.cod }}</p>
+
                         <h2>Identificação</h2>
                         <p>{{ page.preview.name }}</p>
 
+                        <h2>Tipo de Venda</h2>
+                        <p>{{ page.selects.sales.find((obj) => obj.id === page.preview.sale).title }}</p>
+
+                        <h2>Valor R$</h2>
+                        <p>{{ utils.toCurrency(page.preview.unitval) }}</p>
+
                         <h2>Peso (gramas)</h2>
-                        <p>{{ page.preview.weight }}</p>
-
-                        <h2>Tipo</h2>
-                        <p>{{ page.selects.types.find((obj) => obj.id === page.preview.type).title }}</p>
-
+                        <p>{{ `${page.preview.unitpeso ?? ''} ${page.preview.unitpeso >= 1 ? 'Kg' : 'gm'}` }} </p>
+                        
                         <h2>Descrição</h2>
                         <p>{{ page.preview.description }}</p>
                         

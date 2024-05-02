@@ -11,7 +11,6 @@ function createkey(){
 }
 
 function encode(token){
-    createkey()
     const secret = fs.readFileSync('private.key')
     const payload = {
         exp: Math.floor(Date.now() / 1000) + (60 * 60),
@@ -32,6 +31,7 @@ function decode(token){
 }
 
 export default {
+    createkey,
     encode,
     decode
 }

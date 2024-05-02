@@ -1,5 +1,6 @@
 <script setup>
     import { ref, watch } from 'vue'
+    import utils from '../utils/utils';
 
     const props = defineProps({
         header  :{type: Array},
@@ -46,7 +47,7 @@
             <tbody v-if="body">
                 <tr @click="selectItem(b.id)" v-for="b in body" :key="b.id" :class="{'selected':idselected===b.id }">
                     <td v-for="h in props.header" :key="`${b.id}-${h.key}`" class="align-middle p-3">
-                        {{ props.casts[h.key] ? casting('id', b[h.key], props.casts[h.key], 'title') :  b[h.key] }}
+                        {{ props.casts[h.key] ? casting('id', b[h.key], props.casts[h.key], 'title') : h.key === 'unitval' ? utils.toCurrency(b[h.key]) : b[h.key] }}
                         <p v-if="h.sub" class="small txt-color-sec p-0 m-0">
                             <span 
                                 v-for="s in h.sub" :key="s.key" 

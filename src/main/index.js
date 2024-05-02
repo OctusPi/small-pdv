@@ -1,12 +1,11 @@
 import { app, shell, BrowserWindow, dialog } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 
-import path, { join } from "path";
+import { join } from "path";
 import icon from "../../resources/icon.png?asset";
 import fs from "fs";
 import migrations from "./migrations";
 import token from "./security/token";
-import utils from "./utils/utils";
 import Ipc from "./ipc";
 import Controller from "./controller";
 
@@ -27,6 +26,7 @@ function createWindow() {
     const ipc = new Ipc(mainWindow.webContents);
     const controller = new Controller();
 
+    token.createkey()
     migrations.createTables();
 
     ipc.request("setup_conf", async (data) => {

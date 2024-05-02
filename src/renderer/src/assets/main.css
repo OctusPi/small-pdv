@@ -50,6 +50,7 @@
 }
 
 .form-label, .form-label a{
+  font-size: 0.9rem;
   font-weight: 700;
   margin-top: 7px;
   margin-bottom: 2px;
@@ -60,7 +61,7 @@
   background-color: var(--color-imput);
   padding: 10px 14px;
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.3rem;
 }
 
