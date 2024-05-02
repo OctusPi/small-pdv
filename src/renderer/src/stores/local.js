@@ -12,7 +12,7 @@ function getAdmin() {
       return JSON.parse(admin.value);
     } catch (e) {
       console.log('Fail parse string to JSON')
-      return {}
+      return null
     }
   }
 

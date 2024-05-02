@@ -9,9 +9,9 @@ import NotificationUI from './components/NotificationUI.vue';
 
 const ipc = new Ipc()
 const setupView = ref(true)
-const datalist = ref([])
 const notification = ref({ show: false, data: { type: 'success', msg: '' } })
 const remove = ref({})
+const updateList = ref(0)
 
 onBeforeMount(() => {
 	ipc.request('setup_conf', {action: 'Setting.one', data: {}}, (data) => {
@@ -31,9 +31,17 @@ onBeforeMount(() => {
 		</template>
 
 		<template v-else>
-			<ModalDelete :params="remove" />
+			<ModalDelete 
+			:params="remove"
+			@callAlert="(data) => { notification = data }"
+			@callRemove="(data) => { updateList = data }" />
+
 			<NavMain />
-			<RouterView @callAlert="(data) => { notification = data }" />
+
+			<RouterView
+			:updateList="updateList"
+			@callAlert="(data) => { notification = data }"
+			@callRemove="(data) => {remove = data}" />
 		</template>
 	</div>
 </template>

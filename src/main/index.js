@@ -32,7 +32,7 @@ function createWindow() {
     ipc.request("setup_conf", async (data) => {
         async function check_setup(data) {
             const exec = await controller.exec_query(data);
-            ipc.response(data.listen, exec);
+            ipc.response(data.action, exec);
         }
 
         async function save_setup(data) {
@@ -55,17 +55,17 @@ function createWindow() {
             });
 
             const exec = await controller.exec_query(data);
-            ipc.response(data.listen, exec);
+            ipc.response(data.action, exec);
         }
 
         async function update_setup(data) {
             const exec = await controller.exec_query(data);
-            ipc.response(data.listen, exec);
+            ipc.response(data.action, exec);
         }
 
         async function destroy_setup(data) {
             const exec = await controller.exec_query(data);
-            ipc.response(data.listen, !exec);
+            ipc.response(data.action, !exec);
         }
 
         switch (data.action) {
@@ -89,11 +89,11 @@ function createWindow() {
 
     ipc.request("query_db", async (data) => {
         const exec = await controller.exec_query(data);
-        ipc.response(data.listen, exec);
+        ipc.response(data.action, exec);
     });
 
     mainWindow.on("ready-to-show", () => {
-        mainWindow.maximize();
+        // mainWindow.maximize();
         mainWindow.show();
     });
 

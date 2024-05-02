@@ -11,7 +11,7 @@ const props = defineProps({ header:Object })
 const page  = ref({
     data:{},
     recover: false,
-    isadmin: false,
+    isadmin: store.getAdmin() ? true : false,
     infos:{
         datenow: dates.dateNow(),
         hournow: dates.hourNow()
@@ -40,6 +40,7 @@ function recoverPass(){
             emit('callAlert', notifys.warning('Token de validação incorreto...'))
             return
         }
+        ipc.request('setup_conf', {action:'Setting.one', data:{}})
         logOut()
     })
 }
@@ -48,8 +49,6 @@ onMounted(() => {
     setInterval(() => {
         page.value.infos.hournow = dates.hourNow()
     }, 1000);
-
-    page.value.isadmin = store.getAdmin() ? true : false
 })
 
 </script>
@@ -132,7 +131,7 @@ onMounted(() => {
     .header-main{
         width: calc(100% - 120px);
         position: fixed;
-        z-index: 3000;
+        z-index: 2000;
         color: white;
         background-color: var(--color-base);
     }

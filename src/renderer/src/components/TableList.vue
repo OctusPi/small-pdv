@@ -9,6 +9,7 @@
     
     const emit  = defineEmits(['callSelection'])
     const body  = ref(props.body)
+    const idselected = ref(null)
     
     watch(() => props.body, (newValue) => {
         body.value = newValue
@@ -19,7 +20,6 @@
             if(typeof a[key] === 'string'){
                 return a[key].localeCompare(b[key])
             }
-            
             return a[key] - b[key]
         })
     }
@@ -28,19 +28,24 @@
         const findObj = subject.find(obj => obj[key] === search)
         return extract && findObj && findObj[extract] ? findObj[extract] ?? '' : findObj
     }
+
+    function selectItem(id){
+        idselected.value = id
+        emit('callSelection', id)
+    }
 </script>
 
 <template>
     <div v-if="body.length" class="table-responsive-sm">
-        <table class="table table-borderless table-hover">
+        <table class="table table-striped table-hover">
             <thead v-if="props.header">
                 <tr>
                     <th scope="col" v-for="h in props.header" :key="h.key" @click="orderBy(h.key)">{{ h.title }}<i class="bi bi-arrow-down-up ms-2 table-order-icon"></i></th>
                 </tr>
             </thead>
             <tbody v-if="body">
-                <tr v-for="b in body" :key="b.id">
-                    <td v-for="h in props.header" :key="`${b.id}-${h.key}`" class="align-middle">
+                <tr @click="selectItem(b.id)" v-for="b in body" :key="b.id" :class="{'selected':idselected===b.id }">
+                    <td v-for="h in props.header" :key="`${b.id}-${h.key}`" class="align-middle p-3">
                         {{ props.casts[h.key] ? casting('id', b[h.key], props.casts[h.key], 'title') :  b[h.key] }}
                         <p v-if="h.sub" class="small txt-color-sec p-0 m-0">
                             <span 
@@ -61,9 +66,6 @@
 </template>
 
 <style>
-
-    
-
     .table, .table th, .table td{
         background-color: transparent !important;
         color: var(--color-text);
@@ -80,6 +82,10 @@
 
     .table th:hover i{
         color: var(--color-base);
+    }
+
+    .selected{
+        background-color: aqua;
     }
     
    

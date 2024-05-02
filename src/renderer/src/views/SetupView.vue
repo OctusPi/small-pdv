@@ -28,7 +28,11 @@ function saveSetup() {
 		return
 	}
 
-	ipc.request('setup_conf', {action: 'Setting.save', data: {...page.value.data}})
+	ipc.request('setup_conf', {action: 'Setting.save', data: {...page.value.data}}, (data) => {
+		if(data){
+			ipc.request('setup_conf', {action:'Setting.one', data:{}})
+		}
+	})
 }
 
 function handleFile(event) {

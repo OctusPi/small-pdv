@@ -1,5 +1,5 @@
 <script setup>
-    import { onMounted, ref } from 'vue';
+    import { onMounted, ref, watch } from 'vue';
     import Ipc from '../services/ipc'
     import masks from './../utils/masks'
     import forms from './../services/forms'
@@ -7,7 +7,10 @@
     import HeaderMain from '../components/HeaderMain.vue';
     import TableList from '../components/TableList.vue'
 
-    const emit = defineEmits(['callAlert'])
+    const emit = defineEmits(['callAlert', 'callRemove'])
+    const props = defineProps({
+        updateList:{ type: Number }
+    })
     const ipc = new Ipc()
     const page = ref({
         data:{},
@@ -37,15 +40,35 @@
         }
     })
 
-    function toggleView(){
-        page.value.views.register = !page.value.views.register
-        page.value.views.list = !page.value.views.list
+    watch(() => props.updateList, (newdata) => {
+        if(newdata > 0){
+            ipc.request('query_db', {action:'Tare.all', data:{}})
+            page.value.preview = {}
+        }
+    })
+
+    function toggleView(view = null){
+
+        switch (view) {
+            case 'register':
+                page.value.views.register = true
+                page.value.views.list = false
+                break;
+        
+            default:
+                page.value.views.register = false
+                page.value.views.list = true
+                page.value.data = {}
+                page.value.uploads = {}
+                break;
+        }
     }
 
     function listData(){
         ipc.request('query_db', {action:'Tare.all', data:{}}, (datalist) => {
-            console.log(datalist)
-            if(datalist){ page.value.datalist = datalist.map((obj) => obj.dataValues) }
+            if(datalist && Array.isArray(datalist)){
+                page.value.datalist = datalist.map((obj) => obj.dataValues)
+            }
         })
     }
 
@@ -57,17 +80,37 @@
             return
         }
 
-        const action = page.value.data.id ? 'update' : 'save'
-        ipc.request('query_db', {action:`Tare.${action}`, data: {...page.value.data}}, (data) => {
+        const action = `Tare.${page.value.data.id ? 'update' : 'save'}`
+        const data = page.value.data.id 
+        ? {values:{...page.value.data}, where:{id:page.value.data.id}}
+        : {...page.value.data}
+
+
+        ipc.request('query_db', {action, data}, (data) => {
             if(data){
-                emit('callAlert', notifys.success('Registro salvo com sucesso!'))
                 toggleView()
-                return
-            }
-            
-            emit('callAlert', notifys.warning('Falha ao gravar dados!'))
+                ipc.request('query_db', {action:'Tare.all', data:{}})
+                emit('callAlert', notifys.success('Registro salvo com sucesso!'))
+            }else{
+                emit('callAlert', notifys.warning('Falha ao gravar dados!'))
+            } 
         })
-        listData()
+
+    }
+
+    function updateData(){
+        toggleView('register')
+        page.value.data = page.value.preview
+        page.value.uploads.url = `data:image/png;base64,${page.value.data.pic}`
+    }
+
+    function deleteData(){
+
+        emit('callRemove', {action:'Tare.destroy', data:{id:page.value.preview.id}})
+    }
+
+    function selectItem(id){
+        page.value.preview = page.value.datalist.find((obj) => obj.id === id)
     }
 
     function handleFile(event) {
@@ -101,7 +144,7 @@
                 
                 <!-- action bar -->
                 <nav v-if="!page.views.register" class="text-end p-0">
-                    <button @click="toggleView" type="button" class="btn btn-lg btn-primary">
+                    <button @click="toggleView('register')" type="button" class="btn btn-lg btn-primary">
                         <i class="bi bi-plus-circle"></i> Adicionar
                     </button>
                 </nav>
@@ -145,7 +188,7 @@
                             <button type="submit" class="btn btn-lg btn-success me-2">
                                 <i class="bi bi-check-circle"></i> Salvar
                             </button>
-                            <button @click="toggleView" type="button" class="btn btn-lg btn-secondary">
+                            <button @click="toggleView()" type="button" class="btn btn-lg btn-secondary">
                                 <i class="bi bi-x-circle"></i> Cancelar
                             </button>
                         </div>
@@ -157,75 +200,75 @@
                     <TableList 
                     :header="page.dataheader"
                     :body="page.datalist"
-                    :casts="{'type':page.selects.types}"/>
+                    :casts="{'type':page.selects.types}"
+                    @callSelection="selectItem"/>
                 </div>
             </div>
 
-            <div class="preview m-2 d-flex flex-column">
-                
+            <div class="preview m-2 d-flex flex-column justify-content-center">
+                <div v-if="page.preview?.name">
                     <div class="dataview mb-4">
                         <div class="ct-img-preview mb-4">
-                            imgem
+                            <img :src="`data:image/png;base64,${page.preview.pic}`" class="img-preview">
                         </div>
 
                         <h2>Identificação</h2>
-                        <p>{{ page.preview.name }} Pote Descatável 100ml</p>
+                        <p>{{ page.preview.name }}</p>
 
                         <h2>Peso (gramas)</h2>
-                        <p>{{ page.preview.wheigth }} 3</p>
+                        <p>{{ page.preview.weight }}</p>
 
                         <h2>Tipo</h2>
-                        <p>{{ page.preview.type }} Descartável Delivery</p>
+                        <p>{{ page.selects.types.find((obj) => obj.id === page.preview.type).title }}</p>
 
                         <h2>Descrição</h2>
-                        <p>{{ page.preview.description }} Material de Isopor com tampa removivel</p>
-
-                        
+                        <p>{{ page.preview.description }}</p>
                         
                     </div>
                     <div class="actionsbtns text-center">
-                        <button type="button" class="btn btn-primary me-2">
+                        <button @click="updateData" type="button" class="btn btn-primary me-2">
                             <i class="bi bi-pen"></i> Editar
                         </button>
-                        <button type="button" class="btn btn-danger">
+                        <button @click="deleteData" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete">
                             <i class="bi bi-trash"></i> Excluir
                         </button>
                     </div>
-                
+                </div>
+                <div v-else class="text-center">
+                    <i class="bi bi-front fs-3"></i>
+                    <p class="small">Selecione um item para visualizar</p>
+                </div>
             </div>
         </div>
     </main>
 </template>
 
-
 <style scoped>
+    .company-pic {
+        width: 140px;
+        height: 140px;
+        padding: 10px;
+        
+        background-color: var(--color-fundo);
+        border-radius: 10px;
+        border: 2px dashed var(--color-shadow);
+        position: relative;
+        background-color: var(--color-input-border);
+    }
 
-.company-pic {
-    width: 140px;
-	height: 140px;
-    padding: 10px;
-    
-	background-color: var(--color-fundo);
-	border-radius: 10px;
-	border: 2px dashed var(--color-shadow);
-	position: relative;
-    background-color: var(--color-input-border);
-}
+    .img-logo {
+        height: 140px;
+        border-radius: 10px;
+    }
 
-.img-logo {
-	height: 140px;
-	border-radius: 10px;
-}
-
-.company-pic-input {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	left: 0;
-	top: 0;
-	cursor: pointer;
-	opacity: 0;
-    z-index: 1000;
-}
-
+    .company-pic-input {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        cursor: pointer;
+        opacity: 0;
+        z-index: 1000;
+    }
 </style>
