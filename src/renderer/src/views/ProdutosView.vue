@@ -20,8 +20,7 @@
             {key:'name', title:'IDENTIFICAÇÃO'},
             {key:'sale', title:'VENDA'},
             {key:'unitval', title:'VALOR'},
-            {key:'unitpeso', title:'PESO'},
-            {key:'description', title:'DESCRIÇÃO'}
+            {key:'unitpeso', title:'PESO'}
         ],
         datalist:[],
         views:{register: false, list:true },
@@ -108,6 +107,7 @@
     function updateData(){
         toggleView('register')
         page.value.data = page.value.preview
+        page.value.data.unitval = utils.toCurrency(page.value.data.unitval)
         page.value.uploads.url = `data:image/png;base64,${page.value.data.pic}`
     }
 
@@ -151,7 +151,7 @@
                 
                 <!-- action bar -->
                 <nav v-if="!page.views.register" class="text-end p-0">
-                    <button @click="toggleView('register')" type="button" class="btn btn-lg btn-primary">
+                    <button @click="toggleView('register')" type="button" class="btn btn-lg btn-action">
                         <i class="bi bi-plus-circle"></i> Adicionar
                     </button>
                 </nav>

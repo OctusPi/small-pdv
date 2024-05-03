@@ -32,6 +32,16 @@
     font-size: 1.2rem;
 }
 
+.btn-action{
+  background-color: var(--color-base);
+  color: white;
+}
+
+.btn-action:hover{
+  background-color: var(--color-hover);
+  color: white;
+}
+
 .load-wall{
   position: fixed;
   width: 100%;

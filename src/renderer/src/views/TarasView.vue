@@ -144,7 +144,7 @@
                 
                 <!-- action bar -->
                 <nav v-if="!page.views.register" class="text-end p-0">
-                    <button @click="toggleView('register')" type="button" class="btn btn-lg btn-primary">
+                    <button @click="toggleView('register')" type="button" class="btn btn-lg btn-action">
                         <i class="bi bi-plus-circle"></i> Adicionar
                     </button>
                 </nav>
