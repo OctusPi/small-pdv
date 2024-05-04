@@ -9,9 +9,6 @@
     import TableList from '../components/TableList.vue'
 
     const emit = defineEmits(['callAlert', 'callRemove'])
-    const props = defineProps({
-        updateList:{ type: Number }
-    })
     const ipc = new Ipc()
     const page = ref({
         data:{},
@@ -25,28 +22,16 @@
         datalist:[],
         views:{register: true, list:false },
         preview:{},
+        item:null,
         selects:{
-            sales:[
-                {id:1, title:'Por Peso'},
-                {id:2, title:'Por Unidade'}
-            ]
+            tares:[],
+            products:[],
+            products_filter:[]
         },
         uploads:{},
         rules:{
-            fields:{
-                cod:'required',
-                sale:'required',
-                name: 'required',
-                unitval: 'required',
-            },
+            fields:{},
             valids:{}
-        }
-    })
-
-    watch(() => props.updateList, (newdata) => {
-        if(newdata > 0){
-            ipc.request('query_db', {action:'Product.all', data:{}})
-            page.value.preview = {}
         }
     })
 
@@ -104,36 +89,46 @@
 
     }
 
-    function updateData(){
-        toggleView('register')
-        page.value.data = page.value.preview
-        page.value.data.unitval = utils.toCurrency(page.value.data.unitval)
-        page.value.uploads.url = `data:image/png;base64,${page.value.data.pic}`
-    }
-
-    function deleteData(){
-
-        emit('callRemove', {action:'Product.destroy', data:{id:page.value.preview.id}})
-    }
-
     function selectItem(id){
         page.value.preview = page.value.datalist.find((obj) => obj.id === id)
     }
 
-    function handleFile(event) {
-	    const file = event.target.files[0]
-        if (file) {
+    function filterProducts(value){
+        if(Array.isArray(page.value.selects.products) && value){
+            page.value.selects.products_filter = (page.value.selects.products).filter(obj => (obj.dataValues.name).includes(value))
+        }else{
+            page.value.item = null
+        }
+    }
 
-            const reader  = new FileReader()
-            reader.readAsDataURL(file)
-            reader.onloadend = () =>{
-                page.value.data.pic = reader.result.replace(/^data:image\/[a-z]+;base64,/, "")
+    function selectProduct(product){
+        page.value.item = product
+        page.value.data.product = product.name
+        page.value.rules.valids = {}
+        
+        if(product.sale === 1){
+            page.value.rules.fields = {
+                product: 'required',
+                tare: 'required',
+                weight: 'required'
             }
-            page.value.uploads.url = file.path
+        }else{
+            page.value.rules.fields = {
+                product: 'required',
+                quantity: 'required'
+            }
         }
     }
 
     onMounted(() => {
+        ipc.request('query_db', {action:'Tare.all', data:{}}, (data) => {
+            page.value.selects.tares = data
+        })
+
+        ipc.request('query_db', {action:'Product.all', data:{}}, (data) => {
+            page.value.selects.products = data
+        })
+
         listData()
     })
 
@@ -155,7 +150,7 @@
                         <i class="bi bi-list-task"></i> Ultimas Vendas
                     </button>
                     <button v-if="!page.views.register" @click="toggleView('register')" type="button" class="btn btn-lg btn-action">
-                        <i class="bi bi-list-task"></i> Nova Vendas
+                        <i class="bi bi-cart-plus"></i> Nova Venda
                     </button>
                 </nav>
 
@@ -164,17 +159,44 @@
                     
                     <form @submit.prevent="saveData" class="row g-2 mb-3">
                         
-                        <div class="col-9">
-                            <label for="name" class="form-label text-start">Localizar Produto <span class="small text-danger">*</span></label>
-                            <input id="name" v-model="page.data.name" type="text"
-                                :class="{ 'form-control-alert': page.rules.valids.name }" class="form-control"
+                        <div class="col-12 pe-0 position-relative">
+                            <label for="product" class="form-label text-start">Localizar Produto <span class="small text-danger">*</span></label>
+                            <input @keyup="filterProducts(page.data.product)" id="product" v-model="page.data.product" type="text"
+                                :class="{ 'form-control-alert': page.rules.valids.product }" class="form-control"
                                 placeholder="Identificação do Produto"  />
+
+                            <div v-if="page.data.product && !page.item" class="position-absolute form-control select-item">
+                                <ul class="p-0 m-0">
+                                    <li v-for="s in page.selects.products_filter" 
+                                    :key="s.dataValues.id"
+                                    @click="selectProduct(s.dataValues)"
+                                    class="d-flex align-items-center rounded p-2 m-0 mb-2 li-select-item">
+                                        <img :src="`data:image/png;base64,${s.dataValues.pic}`" class="image-product-select me-2">
+                                        <div class="fw-semibold">{{ s.dataValues.name }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <label for="tare" class="form-label text-start">Tara <span class="small text-danger">*</span></label>
+                            <select id="tare" v-model="page.data.tare" class="form-control" 
+                            :class="{ 'form-control-alert': page.rules.valids.tare }">
+                                <option></option>
+                                <option v-for="s in page.selects.tares" :key="s.id">{{ `${s.dataValues.name} - (${s.dataValues.weight} gm)` }}</option>
+                            </select>
                         </div>
                         <div class="col-3">
-                            <label for="cod" class="form-label text-start">Peso/Quant. <span class="small text-danger">*</span></label>
-                            <input id="cod" v-model="page.data.cod" type="text"
-                                :class="{ 'form-control-alert': page.rules.valids.cod }" class="form-control"
-                                placeholder="Código Produto" />
+                            <label for="weight" class="form-label text-start">Peso <span class="small text-danger">*</span></label>
+                            <input id="weight" v-model="page.data.weight" type="text"
+                                :class="{ 'form-control-alert': page.rules.valids.weight }" class="form-control"
+                                placeholder="0.000" v-maska:[masks.maskpeso] />
+                        </div>
+                        <div class="col-3 pe-0">
+                            <label for="quantity" class="form-label text-start">Quant. <span class="small text-danger">*</span></label>
+                            <input id="quantity" v-model="page.data.quantity" type="text"
+                                :class="{ 'form-control-alert': page.rules.valids.quantity }" class="form-control"
+                                placeholder="00000" v-maska:[masks.masknumbs] />
                         </div>
                         
                         <div class="mt-4">
@@ -198,9 +220,7 @@
             <div class="preview m-2 d-flex flex-column justify-content-center">
                 <div v-if="page.preview?.name">
                     <div class="dataview mb-4">
-                        <div class="ct-img-preview mb-4">
-                            <img :src="`data:image/png;base64,${page.preview.pic}`" class="img-preview">
-                        </div>
+                        
 
                         <h2>Código</h2>
                         <p>{{ page.preview.cod }}</p>
@@ -240,31 +260,21 @@
 </template>
 
 <style scoped>
-    .company-pic {
-        width: 140px;
-        height: 140px;
-        padding: 10px;
-        
-        background-color: var(--color-fundo);
-        border-radius: 10px;
-        border: 2px dashed var(--color-shadow);
-        position: relative;
-        background-color: var(--color-input-border);
+    .select-item{
+        min-height: 100px;
+        max-height: 250px;
+        overflow: auto;
     }
 
-    .img-logo {
-        height: 140px;
-        border-radius: 10px;
+    .image-product-select{
+        width: 50px;
     }
 
-    .company-pic-input {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
+    .li-select-item{
         cursor: pointer;
-        opacity: 0;
-        z-index: 1000;
+    }
+
+    .li-select-item:hover{
+        background: var(--color-input-border);
     }
 </style>

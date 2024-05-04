@@ -13,6 +13,7 @@ class Controller{
         switch(method){
             case 'all':
                 return await model.findAll()
+            case 'check':
             case 'one':
                 return await model.findOne({where: data ?? {}})
             case 'save':

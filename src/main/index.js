@@ -73,6 +73,10 @@ function createWindow() {
                 await check_setup(data);
                 break;
 
+            case "Setting.check":
+                await check_setup(data);
+                break;
+
             case "Setting.save":
                 await save_setup(data);
                 break;

@@ -14,7 +14,7 @@ const remove = ref({})
 const updateList = ref(0)
 
 onBeforeMount(() => {
-	ipc.request('setup_conf', {action: 'Setting.one', data: {}}, (data) => {
+	ipc.request('setup_conf', {action: 'Setting.check', data: {}}, (data) => {
 		setupView.value = data
 	})
 })
