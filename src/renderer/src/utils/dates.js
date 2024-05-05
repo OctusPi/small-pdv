@@ -8,7 +8,7 @@ function dateNow() {
   
     const dataAtual = new Date();
     const diaSemana = diasDaSemana[dataAtual.getDay()];
-    const dia = dataAtual.getDate();
+    const dia = pad(dataAtual.getDate(), 2);
     const mes = mesesDoAno[dataAtual.getMonth()];
     const ano = dataAtual.getFullYear();
   
@@ -24,7 +24,20 @@ function hourNow() {
     return `${hora}:${minutos}:${segundos}`;
 }
 
+function dateTimeNowUtc(){
+    const dataAtual = new Date();
+    const dia = pad(dataAtual.getDate(), 2);
+    const mes = pad(dataAtual.getMonth(),2);
+    const ano = dataAtual.getFullYear();
+    const hora = pad(dataAtual.getHours(), 2);
+    const minutos = pad(dataAtual.getMinutes(), 2);
+    const segundos = pad(dataAtual.getSeconds(), 2);
+
+    return `${ano}-${mes}-${dia} ${hora}:${minutos}:${segundos}`
+}
+
 export default {
     dateNow,
-    hourNow
+    hourNow,
+    dateTimeNowUtc
 }

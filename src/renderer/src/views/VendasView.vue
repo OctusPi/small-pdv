@@ -1,16 +1,22 @@
 <script setup>
-    import { onMounted, ref, watch } from 'vue';
+    import { onBeforeMount, ref, createApp } from 'vue';
+    
     import Ipc from '../services/ipc'
     import masks from './../utils/masks'
     import utils from './../utils/utils'
+    import dates from '../utils/dates';
+    import store from '../stores/local';
     import forms from './../services/forms'
     import notifys from '@renderer/utils/notifys'
+
     import HeaderMain from '../components/HeaderMain.vue';
     import TableList from '../components/TableList.vue'
+    import ReceiptView from './ReceiptView.vue';
 
     const emit = defineEmits(['callAlert', 'callRemove'])
     const ipc = new Ipc()
     const page = ref({
+        config:{},
         data:{},
         dataheader:[
             {key:'cod', title:'COD'},
@@ -21,18 +27,26 @@
         ],
         datalist:[],
         views:{register: true, list:false },
-        preview:{},
         item:null,
         selects:{
             tares:[],
             products:[],
             products_filter:[]
         },
-        uploads:{},
         rules:{
             fields:{},
             valids:{}
         }
+    })
+    
+    const cart = ref({
+        cod: '',
+        seller: store.getAdmin() ? 'ADMINISTRADOR' : 'VENDEDOR',
+        dateandtime: '',
+        items:[],
+        total: 0,
+        status:true
+
     })
 
     function toggleView(view = null){
@@ -63,28 +77,23 @@
 
     function saveData(){
 
-        const validation = forms.checkform(page.value.data, page.value.rules);
-        if (!validation.isvalid) {
-            emit('callAlert', notifys.warning(validation.message))
+        if(!cart.value.items.length){
+            emit('callAlert', notifys.warning('O carrinho está vazio...'))
             return
         }
 
-         //convert monetary values
-         page.value.data.unitval = utils.toDouble(page.value.data.unitval)
-
-        const action = `Product.${page.value.data.id ? 'update' : 'save'}`
-        const data = page.value.data.id 
-        ? {values:{...page.value.data}, where:{id:page.value.data.id}}
-        : {...page.value.data}
-
-        ipc.request('query_db', {action, data}, (data) => {
+        const data = {...cart.value}
+        data.items = JSON.stringify(cart.value.items)
+        ipc.request('query_db', {action: 'Order.save', data:data}, (data) => {
             if(data){
-                toggleView()
-                ipc.request('query_db', {action:'Product.all', data:{}})
-                emit('callAlert', notifys.success('Registro salvo com sucesso!'))
-            }else{
-                emit('callAlert', notifys.warning('Falha ao gravar dados!'))
-            } 
+                emit('callAlert', notifys.success('Venda salva com sucesso!'))
+                cart.value.items = []
+                page.value.data = {}
+
+                return;
+            }
+
+            emit('callAlert', notifys.warning('Falha ao salver venda!'))
         })
 
     }
@@ -120,13 +129,80 @@
         }
     }
 
-    onMounted(() => {
+    function cartAdd(){
+
+        const validation = forms.checkform(page.value.data, page.value.rules);
+        if (!validation.isvalid) {
+            emit('callAlert', notifys.warning(validation.message))
+            return
+        }
+
+        if(page.value.item){
+
+            if(cart.value.items.length === 0){
+                cart.value.cod = utils.rdname(12)
+                cart.value.dateandtime = dates.dateTimeNowUtc()
+            }
+            
+            //add product
+            const product = {...page.value.item}
+            const tare = (page.value.selects.tares).find(obj => obj.dataValues.id === page.value.data.tare)
+            const item = {
+                product:product,
+                tare: tare,
+                weight: page.value.data.weight,
+                quantity: page.value.data.quantity,
+                value: product.sale === 1 
+                ? ((product.unitval / product.unitpeso) * (page.value.data.weight - tare.dataValues.weight)).toFixed(2) 
+                : (product.unitval * page.value.data.quantity).toFixed(2)
+            }
+            cart.value.items.push(item)
+
+            //sum total value cart
+            cart.value.total += utils.toDouble(item.value)
+
+            //clear to next product
+            page.value.data = {}
+            page.value.item = null
+            page.value.rules.fields = {}
+            return
+        }
+
+        emit('callAlert', notifys.warning('Selecione um item para adicionar ao carrinho!'))
+    }
+
+    function cartRemoveItem(item){
+        cart.value.items = (cart.value.items).filter(obj => obj.product.id !== item.product.id)
+        cart.value.total -= item.value
+    }
+
+    function cartCleanAll(){
+        cart.value.items = []
+        cart.value.total = 0
+    }
+
+    function cartPrint(){
+        if(cart.value.items.length){
+
+            window.print()
+            return;
+        
+        }
+
+        emit('callAlert', notifys.warning('O carrinho está vazio...'))
+    }
+
+    onBeforeMount(() => {
         ipc.request('query_db', {action:'Tare.all', data:{}}, (data) => {
             page.value.selects.tares = data
         })
 
         ipc.request('query_db', {action:'Product.all', data:{}}, (data) => {
             page.value.selects.products = data
+        })
+        
+        ipc.request('query_db', {action:'Setting.one', data:{}}, (data) => {
+            page.value.config = data?.dataValues
         })
 
         listData()
@@ -142,6 +218,11 @@
         
         <div class="section-main d-md-flex justify-content-between">
             
+            <!-- box receipt -->
+            <div class="print-container">
+                <ReceiptView :config="page.config" :cart="cart" />
+            </div>
+
             <div class="ioview m-2">
                 
                 <!-- action bar -->
@@ -157,8 +238,7 @@
                 <!-- box registe -->
                 <div v-show="page.views.register" class="inside-container">
                     
-                    <form @submit.prevent="saveData" class="row g-2 mb-3">
-                        
+                    <form @submit.prevent="cartAdd" class="row g-2 mb-3">
                         <div class="col-12 pe-0 position-relative">
                             <label for="product" class="form-label text-start">Localizar Produto <span class="small text-danger">*</span></label>
                             <input @keyup="filterProducts(page.data.product)" id="product" v-model="page.data.product" type="text"
@@ -183,15 +263,17 @@
                             <select id="tare" v-model="page.data.tare" class="form-control" 
                             :class="{ 'form-control-alert': page.rules.valids.tare }">
                                 <option></option>
-                                <option v-for="s in page.selects.tares" :key="s.id">{{ `${s.dataValues.name} - (${s.dataValues.weight} gm)` }}</option>
+                                <option v-for="s in page.selects.tares" :key="s.id" :value="s.dataValues.id">{{ `${s.dataValues.name} - (${s.dataValues.weight} gm)` }}</option>
                             </select>
                         </div>
+
                         <div class="col-3">
                             <label for="weight" class="form-label text-start">Peso <span class="small text-danger">*</span></label>
                             <input id="weight" v-model="page.data.weight" type="text"
                                 :class="{ 'form-control-alert': page.rules.valids.weight }" class="form-control"
                                 placeholder="0.000" v-maska:[masks.maskpeso] />
                         </div>
+
                         <div class="col-3 pe-0">
                             <label for="quantity" class="form-label text-start">Quant. <span class="small text-danger">*</span></label>
                             <input id="quantity" v-model="page.data.quantity" type="text"
@@ -215,38 +297,50 @@
                     :casts="{'sale':page.selects.sales}"
                     @callSelection="selectItem"/>
                 </div>
+
+                
             </div>
 
             <div class="preview m-2 d-flex flex-column justify-content-center">
-                <div v-if="page.preview?.name">
-                    <div class="dataview mb-4">
-                        
-
-                        <h2>Código</h2>
-                        <p>{{ page.preview.cod }}</p>
-
-                        <h2>Identificação</h2>
-                        <p>{{ page.preview.name }}</p>
-
-                        <h2>Tipo de Venda</h2>
-                        <p>{{ page.selects.sales.find((obj) => obj.id === page.preview.sale).title }}</p>
-
-                        <h2>Valor R$</h2>
-                        <p>{{ utils.toCurrency(page.preview.unitval) }}</p>
-
-                        <h2>Peso (gramas)</h2>
-                        <p>{{ `${page.preview.unitpeso ?? ''} ${page.preview.unitpeso >= 1 ? 'Kg' : 'gm'}` }} </p>
-                        
-                        <h2>Descrição</h2>
-                        <p>{{ page.preview.description }}</p>
-                        
+                <div v-if="cart.items.length">
+                    <div class="dataview">
+                        <table class="table table-striped table-cart-products">
+                            <thead>
+                                <tr>
+                                    <th>Prod.</th>
+                                    <th class="text-center">Peso</th>
+                                    <th class="text-center">Qaunt.</th>
+                                    <th>Unit.</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="i in cart.items" :key="i.product.id">
+                                    <td class="align-middle">{{ i.product.name }}</td>
+                                    <td class="text-center align-middle">{{ i.weight }}</td>
+                                    <td class="text-center align-middle">{{ i.quantity }}</td>
+                                    <td class="align-middle">{{ utils.toCurrency(i.product.unitval) }}</td>
+                                    <td class="align-middle">{{ utils.toCurrency(utils.toDouble(i.value)) }}</td>
+                                    <td class="align-middle"><i @click="cartRemoveItem(i)" class="bi bi-x hover-danger"></i></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+
+                    <div class="info-pedido my-3">
+                        <h2 class="text-end fs-4 fw-bold m-0 p-0"> Total: {{ utils.toCurrency(cart.total) }}</h2>
+                    </div>
+
                     <div class="actionsbtns text-center">
-                        <button @click="updateData" type="button" class="btn btn-primary me-2">
-                            <i class="bi bi-pen"></i> Editar
+                        <button @click="cartPrint" type="button" class="btn btn-primary me-2">
+                            <i class="bi bi-printer"></i> Imprimir
                         </button>
-                        <button @click="deleteData" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete">
-                            <i class="bi bi-trash"></i> Excluir
+                        <button @click="saveData" type="button" class="btn btn-success me-2">
+                            <i class="bi bi-check-circle"></i> Confirmar
+                        </button>
+                        <button @click="cartCleanAll" type="button" class="btn btn-danger">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </div>
@@ -259,7 +353,7 @@
     </main>
 </template>
 
-<style scoped>
+<style>
     .select-item{
         min-height: 100px;
         max-height: 250px;
@@ -276,5 +370,33 @@
 
     .li-select-item:hover{
         background: var(--color-input-border);
+    }
+
+    .table-cart-products td{
+        font-size: small;
+        margin: 0;
+    }
+
+    .print-container {
+        display: none;
+    }
+
+
+    @media print {
+
+        .container-main {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        .main-nav, .header-main, .header-main *, .ioview, .ioview *, .preview, .preview *{
+            display: none;
+        }
+
+        .print-container {
+            /* Estilos específicos para o componente durante a impressão */
+            display: block !important; /* Garante que o componente seja exibido durante a impressão */
+        }
     }
 </style>

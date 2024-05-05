@@ -108,12 +108,12 @@
 }
 
 .ioview{
-  min-width: 70%;
+  min-width: 60%;
   padding: 18px 25px 18px 25px;
 }
 
 .preview{
-  min-width: 27%;
+  min-width: 37%;
   padding: 18px 30px 18px 30px;
   border-left: var(--border-box);
 }
@@ -160,15 +160,25 @@
   border-radius: 50%;
 }
 
+.hover-danger:hover{
+  color: var(--color-danger);
+}
+
 @media (max-width:780px) {
   .preview{
     border: 0;
   }
 }
 
-@media (min-height: 740px){
+@media (min-height: 640px){
   .dataview{
-    max-height: 600px;
+    max-height: 445px;
+  }
+}
+
+@media (min-height: 800px){
+  .dataview{
+    max-height: 640px;
   }
 }
 
