@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 function pad(numero, tamanho) {
     return String(numero).padStart(tamanho, '0');
 }
@@ -36,8 +38,13 @@ function dateTimeNowUtc(){
     return `${ano}-${mes}-${dia} ${hora}:${minutos}:${segundos}`
 }
 
+function dateToPtBr(utcdate){
+    return format(new Date(utcdate), 'dd/MM/yyyy HH:mm:ss')
+}
+
 export default {
     dateNow,
     hourNow,
-    dateTimeNowUtc
+    dateTimeNowUtc,
+    dateToPtBr
 }

@@ -20,13 +20,13 @@
         data:{},
         dataheader:[
             {key:'cod', title:'COD'},
-            {key:'name', title:'IDENTIFICAÇÃO'},
-            {key:'sale', title:'VENDA'},
-            {key:'unitval', title:'VALOR'},
-            {key:'unitpeso', title:'PESO'}
+            {key:'seller', title:'IDENTIFICAÇÃO'},
+            {key:'dateandtime', title:'VENDA'},
+            {key:'total', title:'VALOR'}
         ],
         datalist:[],
         views:{register: true, list:false },
+        preview: null,
         item:null,
         selects:{
             tares:[],
@@ -53,7 +53,16 @@
 
         switch (view) {
             case 'register':
-                page.value.data.cod = page.value.data.cod ?? utils.rdname(8)
+                page.value.preview = null
+
+                cart.value = {
+                    cod: '',
+                    seller: store.getAdmin() ? 'ADMINISTRADOR' : 'VENDEDOR',
+                    dateandtime: '',
+                    items:[],
+                    total: 0,
+                    status:true
+                }
                 page.value.views.register = true
                 page.value.views.list = false
                 break;
@@ -68,7 +77,7 @@
     }
 
     function listData(){
-        ipc.request('query_db', {action:'Product.all', data:{}}, (datalist) => {
+        ipc.request('query_db', {action:'Order.limit', data:{}}, (datalist) => {
             if(datalist && Array.isArray(datalist)){
                 page.value.datalist = datalist.map((obj) => obj.dataValues)
             }
@@ -76,7 +85,7 @@
     }
 
     function saveData(){
-
+        console.log(cart.value)
         if(!cart.value.items.length){
             emit('callAlert', notifys.warning('O carrinho está vazio...'))
             return
@@ -90,6 +99,8 @@
                 cart.value.items = []
                 page.value.data = {}
 
+                ipc.request('query_db', {action:'Order.limit', data:{}})
+
                 return;
             }
 
@@ -100,6 +111,12 @@
 
     function selectItem(id){
         page.value.preview = page.value.datalist.find((obj) => obj.id === id)
+        if(page.value.preview){
+            const extractPreview = {...page.value.preview}
+            extractPreview.items = JSON.parse(page.value.preview.items)
+            cart.value = extractPreview
+        }
+        
     }
 
     function filterProducts(value){
@@ -301,7 +318,7 @@
                 
             </div>
 
-            <div class="preview m-2 d-flex flex-column justify-content-center">
+            <div class="preview m-2 d-flex flex-column">
                 <div v-if="cart.items.length">
                     <div class="dataview">
                         <table class="table table-striped table-cart-products">
@@ -322,7 +339,7 @@
                                     <td class="text-center align-middle">{{ i.quantity }}</td>
                                     <td class="align-middle">{{ utils.toCurrency(i.product.unitval) }}</td>
                                     <td class="align-middle">{{ utils.toCurrency(utils.toDouble(i.value)) }}</td>
-                                    <td class="align-middle"><i @click="cartRemoveItem(i)" class="bi bi-x hover-danger"></i></td>
+                                    <td class="align-middle"><i  v-if="!page.preview" @click="cartRemoveItem(i)" class="bi bi-x hover-danger"></i></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -336,10 +353,10 @@
                         <button @click="cartPrint" type="button" class="btn btn-primary me-2">
                             <i class="bi bi-printer"></i> Imprimir
                         </button>
-                        <button @click="saveData" type="button" class="btn btn-success me-2">
+                        <button v-if="!page.preview" @click="saveData" type="button" class="btn btn-success me-2">
                             <i class="bi bi-check-circle"></i> Confirmar
                         </button>
-                        <button @click="cartCleanAll" type="button" class="btn btn-danger">
+                        <button v-if="!page.preview" @click="cartCleanAll" type="button" class="btn btn-danger">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>

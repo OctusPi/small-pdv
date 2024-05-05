@@ -11,7 +11,7 @@
 
 <template>
     <header class="text-center">
-        <img :src="`data:image/png;base64,${config.logomarca}`" class="logomarca">
+        <img :src="config?.logomarca ? `data:image/png;base64,${config.logomarca}` : ''" class="logomarca">
         <h1 class="p-0 m-0 fs-4">{{ config.company }}</h1>
         <p class="small p-0 m-0">{{ `${config.address} - ${config.phone}` }}</p>
     </header>

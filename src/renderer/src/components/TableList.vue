@@ -1,6 +1,7 @@
 <script setup>
     import { ref, watch } from 'vue'
     import utils from '../utils/utils';
+import dates from '../utils/dates';
 
     const props = defineProps({
         header  :{type: Array},
@@ -26,8 +27,22 @@
     }
 
     function casting(key, search, subject, extract = null){
+        
         const findObj = subject.find(obj => obj[key] === search)
         return extract && findObj && findObj[extract] ? findObj[extract] ?? '' : findObj
+    }
+
+    function getvalue(key, obj){
+       
+        switch (key) {
+            case 'unitval':
+            case 'total':
+                return utils.toCurrency(obj[key])
+            case 'dateandtime':
+                return dates.dateToPtBr(obj[key])
+            default:
+                return obj[key];
+        }
     }
 
     function selectItem(id){
@@ -47,7 +62,7 @@
             <tbody v-if="body">
                 <tr @click="selectItem(b.id)" v-for="b in body" :key="b.id" :class="{'selected':idselected===b.id }">
                     <td v-for="h in props.header" :key="`${b.id}-${h.key}`" class="align-middle p-3">
-                        {{ props.casts[h.key] ? casting('id', b[h.key], props.casts[h.key], 'title') : h.key === 'unitval' ? utils.toCurrency(b[h.key]) : b[h.key] }}
+                        {{ props.casts[h.key] ? casting('id', b[h.key], props.casts[h.key], 'title') : getvalue(h.key, b) }}
                         <p v-if="h.sub" class="small txt-color-sec p-0 m-0">
                             <span 
                                 v-for="s in h.sub" :key="s.key" 

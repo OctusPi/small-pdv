@@ -12,7 +12,7 @@ import Controller from "./controller";
 function createWindow() {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
-        width: 900,
+        width: 1024,
         height: 670,
         show: false,
         autoHideMenuBar: true,
@@ -97,7 +97,7 @@ function createWindow() {
     });
 
     mainWindow.on("ready-to-show", () => {
-        // mainWindow.maximize();
+        mainWindow.maximize();
         mainWindow.show();
     });
 
