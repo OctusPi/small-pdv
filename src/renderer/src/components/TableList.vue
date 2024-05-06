@@ -37,9 +37,9 @@ import dates from '../utils/dates';
         switch (key) {
             case 'unitval':
             case 'total':
-                return utils.toCurrency(obj[key])
+                return obj[key] ? utils.toCurrency(obj[key]) : ''
             case 'dateandtime':
-                return dates.dateToPtBr(obj[key])
+                return obj[key] ? dates.dateToPtBr(obj[key]) : ''
             default:
                 return obj[key];
         }

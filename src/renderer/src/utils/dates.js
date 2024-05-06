@@ -26,10 +26,19 @@ function hourNow() {
     return `${hora}:${minutos}:${segundos}`;
 }
 
+function dateNowUtc(){
+    const dataAtual = new Date();
+    const dia = pad(dataAtual.getDate(), 2);
+    const mes = pad(dataAtual.getMonth()+1,2);
+    const ano = dataAtual.getFullYear();
+
+    return `${ano}-${mes}-${dia}`
+}
+
 function dateTimeNowUtc(){
     const dataAtual = new Date();
     const dia = pad(dataAtual.getDate(), 2);
-    const mes = pad(dataAtual.getMonth(),2);
+    const mes = pad(dataAtual.getMonth()+1,2);
     const ano = dataAtual.getFullYear();
     const hora = pad(dataAtual.getHours(), 2);
     const minutos = pad(dataAtual.getMinutes(), 2);
@@ -42,9 +51,32 @@ function dateToPtBr(utcdate){
     return format(new Date(utcdate), 'dd/MM/yyyy HH:mm:ss')
 }
 
+function dateToUtc(ptbrdate) {
+
+    if(ptbrdate){
+        // Dividir a string da data em dia, mês e ano
+        const partes = ptbrdate.split('/');
+        const dia = partes[0];
+        const mes = partes[1];
+        const ano = partes[2];
+    
+        // Criar uma nova data no formato "mm/dd/yyyy"
+        const dataFormatada = new Date(`${mes}/${dia}/${ano}`);
+    
+        // Extrair a data em formato UTC "yyyy-mm-dd"
+        const dataUTC = dataFormatada.toISOString().split('T')[0];
+    
+        return dataUTC;
+    }
+    
+    return dateTimeNowUtc()
+  }
+
 export default {
     dateNow,
     hourNow,
+    dateNowUtc,
     dateTimeNowUtc,
-    dateToPtBr
+    dateToPtBr,
+    dateToUtc
 }

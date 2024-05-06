@@ -1,4 +1,4 @@
-
+const { Op } = require('sequelize');
 import models from './models'
 
 class Controller{
@@ -13,6 +13,9 @@ class Controller{
         switch(method){
             case 'all':
                 return await model.findAll()
+            case 'between':
+                const w = {where:{'dateandtime':{[Op.between]:data.between}}}
+                return await model.findAll(w)
             case 'limit':
                 return await model.findAll({order:[['id', 'DESC']], limit:20})
             case 'check':

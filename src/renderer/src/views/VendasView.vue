@@ -311,7 +311,7 @@
                     <TableList 
                     :header="page.dataheader"
                     :body="page.datalist"
-                    :casts="{'sale':page.selects.sales}"
+                    :casts="{}"
                     @callSelection="selectItem"/>
                 </div>
 

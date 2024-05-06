@@ -248,6 +248,7 @@
         width: 140px;
         height: 140px;
         padding: 10px;
+        overflow: hidden;
         
         background-color: var(--color-fundo);
         border-radius: 10px;
