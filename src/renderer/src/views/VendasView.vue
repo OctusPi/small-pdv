@@ -401,15 +401,42 @@
 
     @media print {
 
-        .container-main {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-        }
+        * {
+        background-color: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: black;
+    }
 
-        .main-nav, .header-main, .header-main *, .ioview, .ioview *, .preview, .preview *{
-            display: none;
-        }
+    .container-main {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .section-main {
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-nav,
+    .main-nav *,
+    .header-main,
+    .header-main *,
+    .ioview,
+    .ioview *,
+    .preview,
+    .preview *,
+    .alert,
+    .modal 
+    .modal-dialog{
+        display: none;
+        background-color: transparent;
+        padding: 0;
+        margin: 0;
+    }
 
         .print-container {
             /* Estilos específicos para o componente durante a impressão */

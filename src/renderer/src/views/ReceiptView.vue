@@ -11,7 +11,7 @@
 
 <template>
     <header class="text-center">
-        <img :src="config?.logomarca ? `data:image/png;base64,${config.logomarca}` : ''" class="logomarca">
+        <img :src="config?.logomarca ? `data:image/png;base64,${config.logomarca}` : ''" class="logomarcra">
         <h1 class="p-0 m-0 fs-4">{{ config.company }}</h1>
         <p class="small p-0 m-0">{{ `${config.address} - ${config.phone}` }}</p>
     </header>
@@ -20,7 +20,7 @@
         <p class="m-0 p-0 small">{{ `Cod: ${cart.cod}` }}</p>
         <p class="m-0 p-0 small">{{ `Horário: ${cart.dateandtime}` }}</p>
 
-        <table class="table table-striped table-cart-products my-4">
+        <table class="table-cart-products my-4">
             <thead>
                 <tr>
                     <td>Prod.</td>
@@ -43,7 +43,7 @@
         
     </main>
 
-    <footer>
+    <footer class="mb-4">
         <h2 class="text-end fs-4 fw-bold m-0 p-0"> Total: {{ utils.toCurrency(cart.total) }}</h2>
     </footer>
 </template>
@@ -56,10 +56,13 @@
         font-size: 1rem;
     }
 
-    .logomarca{
+    .logomarcra{
         width: 100px;
         margin: 0 auto;
-        margin-bottom: 10px;
+    }
+
+    .table-cart-products{
+        width: 100%;
     }
 
     .table-cart-products td{

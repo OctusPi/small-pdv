@@ -99,7 +99,7 @@ function selectItem(id) {
     cart.value.total = selected.total
 }
 
-function printReport(){
+function printReport() {
     window.print()
 }
 
@@ -112,6 +112,31 @@ function printReport(){
             @callAlert="(data) => { emit('callAlert', data) }" />
 
         <div class="section-main d-md-flex justify-content-between">
+
+            <div class="print-container">
+                    <!-- resume report -->
+                    <div v-if="page.datalist.length" class="remume-report text-white d-flex my-4">
+                        <div class="me-4 p-3 rounded bg-info">
+                            <h1 class="fw-bold"><i class="bi bi-calendar me-2"></i> Relatório</h1>
+                            <p class="p-0 m-0">{{ page.report.search }}</p>
+                        </div>
+                        <div class="me-4 p-3 rounded bg-primary">
+                            <h1 class="fw-bold"> <i class="bi bi-bounding-box me-2"></i> Qt. de Vendas</h1>
+                            <p class="p-0 m-0 fs-4 fw-bold">{{ page.report.total }}</p>
+                        </div>
+                        <div class="p-3 rounded bg-success">
+                            <h1 class="fw-bold"><i class="bi bi-coin me-2"></i> Valor Faturado</h1>
+                            <p class="p-0 m-0 fs-4 fw-bold">{{ page.report.amount }}</p>
+                        </div>
+                    </div>
+
+                    <!-- box list -->
+                    <div class="inside-container">
+                        <TableList :header="page.dataheader" :body="page.datalist" :casts="{}"
+                            @callSelection="selectItem" />
+                    </div>
+
+                </div>
 
             <div class="ioview m-2">
 
@@ -143,7 +168,7 @@ function printReport(){
                 </div>
 
                 <hr>
-                <div class="print-container-report">
+                <div class="print-container-view">
                     <!-- resume report -->
                     <div v-if="page.datalist.length" class="remume-report text-white d-flex my-4">
                         <div class="me-4 p-3 rounded bg-info">
@@ -220,21 +245,53 @@ function printReport(){
 </template>
 
 <style>
+.print-container {
+        display: none;
+    }
+
 @media print {
 
+* {
+background-color: transparent !important;
+margin: 0 !important;
+padding: 0 !important;
+color: black;
+}
+
 .container-main {
-    margin: 0;
-    padding: 0;
-    width: 100%;
+margin: 0;
+padding: 0;
+width: 100%;
 }
 
-.main-nav, .header-main, .header-main *, .ioview  .search-box , .preview, .preview *{
-    display: none;
+.section-main {
+width: 100%;
+height: auto;
+margin: 0;
+padding: 0;
 }
 
-.print-container-report {
+.main-nav,
+.main-nav *,
+.header-main,
+.header-main *,
+.ioview,
+.ioview *,
+.preview,
+.preview *,
+.alert,
+.modal 
+.modal-dialog{
+display: none;
+background-color: transparent;
+padding: 0;
+margin: 0;
+}
+
+.print-container {
     /* Estilos específicos para o componente durante a impressão */
     display: block !important; /* Garante que o componente seja exibido durante a impressão */
 }
 }
+
 </style>
