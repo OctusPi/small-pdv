@@ -28,7 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "maska": "^2.1.11",
     "sequelize": "^6.37.3",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^5.0.2",
     "vue-router": "^4.3.2"
   },
   "devDependencies": {

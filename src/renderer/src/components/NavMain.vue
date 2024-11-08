@@ -4,8 +4,10 @@ import { RouterLink } from 'vue-router'
 
 const menu = ref([
   { icon: 'bi-receipt', title: 'Vendas', route: '/' },
-  { icon: 'bi-bounding-box', title: 'Taras', route: '/taras' },
+  { icon: 'bi-bounding-box', title: 'Cardápio', route: '/taras' },
   { icon: 'bi-boxes', title: 'Produtos', route: '/produtos' },
+  { icon: 'bi-person-vcard', title: 'Clientes', route: '/produtos' },
+  { icon: 'bi-person-bounding-box', title: 'Funcionários', route: '/produtos' },
   { icon: 'bi-journal-bookmark-fill', title: 'Relatórios', route: '/relatorios' },
   { icon: 'bi-gear', title: 'Ajustes', route: '/ajustes' }
 ])
